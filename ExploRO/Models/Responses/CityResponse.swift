@@ -2,7 +2,7 @@ import Foundation
 
 struct CityResponse: Codable {
     let id: Int
-    let cityName: String
+    var cityName: String
     let cityDescription: String
     var imageUrl: String?
 }

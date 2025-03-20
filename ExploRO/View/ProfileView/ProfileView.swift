@@ -63,6 +63,7 @@ struct ProfileView: View {
                     ReauthenticateUserSheetView()
                 }
                 
+                
                 NavigationLink(destination: GroupListView()) {
                     Text("Go to Groups")
                         .frame(maxWidth: .infinity, minHeight: 50)
@@ -71,6 +72,16 @@ struct ProfileView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 15))
                         .padding()
                 }
+                
+                NavigationLink(destination: TripPlanListView()) {
+                    Text("Go to TripPlans")
+                        .frame(maxWidth: .infinity, minHeight: 50)
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 15))
+                        .padding()
+                }
+                
             }
             .padding()
         }

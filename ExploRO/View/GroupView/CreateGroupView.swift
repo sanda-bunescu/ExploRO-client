@@ -35,21 +35,42 @@ struct CreateGroupView: View {
                     .foregroundColor(.black)
                     .padding(.horizontal, 24)
                 
-                Button{
-                    Task{
-                        await viewModel.createGroup(groupName: groupName, user: authViewModel.user)
+                HStack{
+                    Button{
+                        Task{
+                            await viewModel.createGroup(groupName: groupName, user: authViewModel.user)
+                        }
+                    }label:{
+                        Text("Create Group")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.blue)
+                            .cornerRadius(12)
                     }
-                    dismiss()
-                }label:{
-                    Text("Create Group")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(12)
+                    
+                    Button{
+                        dismiss()
+                    }label:{
+                        Text("Exit")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.red)
+                            .cornerRadius(12)
+                    }
+                    
                 }
                 
+                
                 Spacer()
+            }
+        }
+        .alert(viewModel.errorMessage ?? "Unknown error", isPresented: $viewModel.showAlert) {
+            Button("OK") {
+                if viewModel.errorMessage == "Group created successfully"{
+                    dismiss()
+                }
             }
         }
     }

@@ -1,43 +1,43 @@
 import SwiftUI
-
-struct TripPlan:Identifiable {
-    let id = UUID()
-    var Name: String
-    var StartDate: Date
-    var EndDate: Date
-    var NrDays: Int
-}
+import FirebaseAuth
 
 struct TripPlanListView: View {
+    var group: GroupResponse?
+    var city: CityResponse?
     
+    @EnvironmentObject var authViewModel: AuthenticationViewModel1
     @State private var showCreateTripView = false
-    let tripPlans: [TripPlan] = {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd/MM/yyyy"
-
-        return [
-            TripPlan(Name: "Bucuresti", StartDate: dateFormatter.date(from: "01/06/2025") ?? Date(), EndDate: dateFormatter.date(from: "05/06/2025") ?? Date(), NrDays: 5),
-            TripPlan(Name: "Brasov", StartDate: dateFormatter.date(from: "09/02/2025") ?? Date(), EndDate: dateFormatter.date(from: "12/02/2025") ?? Date(), NrDays: 4)
-        ]
-    }()
-
+    @StateObject private var tripPlanViewModel = TripPlanViewModel()
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 15) {
-                    ForEach(tripPlans, id: \.Name) { trip in
+                    
+                    if let groupName = group?.groupName {
+                        VStack{
+                            Text("Trips for Group: \(groupName)")
+                                .font(.headline)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemGray6)))
+                        }.padding(.horizontal)
+                    }
+                    
+                    ForEach(tripPlanViewModel.tripPlans, id: \.id) { trip in
                         VStack(spacing: 15) {
                             HStack {
-                                Text(trip.Name)
-                                    .font(.title2)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.primary)
-
+                                VStack(alignment: .leading){
+                                    Text(trip.tripName)
+                                        .font(.title2)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.primary)
+                                    Text(trip.cityName)
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                }
                                 Spacer()
-
-                                Button {
-                                    // Add navigation action
-                                } label: {
+                                
+                                NavigationLink(destination: TripPlanDetailView(group: group, city: city, tripPlan: trip, tripViewModel: TripPlanViewModel())) {
                                     ZStack {
                                         Circle()
                                             .fill(Color.gray.opacity(0.2))
@@ -48,21 +48,18 @@ struct TripPlanListView: View {
                                             .foregroundColor(.blue)
                                     }
                                 }
+                                
                             }
-
+                            
                             HStack {
-                                Text("\(trip.NrDays) days")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
-
                                 Spacer()
-
-                                VStack{
-                                    Text("From \(trip.StartDate, style: .date)")
+                                
+                                VStack(alignment: .trailing){
+                                    Text("From \(trip.startDate, style: .date)")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
-
-                                    Text("To \(trip.EndDate, style: .date)")
+                                    
+                                    Text("To \(trip.endDate, style: .date)")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
@@ -99,7 +96,30 @@ struct TripPlanListView: View {
             .navigationTitle("Trip Plans")
             .sheet(isPresented: $showCreateTripView) {
                 NavigationStack {
-                    CreateTripPlanView()
+                    if let group = group {
+                        CreateTripPlanView(group: group,
+                                           city: city, tripViewModel: tripPlanViewModel)
+                    } else if let city = city {
+                        CreateTripPlanView(group: group,
+                                           city: city, tripViewModel: tripPlanViewModel)
+                    } else{
+                        CreateTripPlanView(group: group,
+                                           city: city, tripViewModel: tripPlanViewModel)
+                    }
+                }
+            }
+            .onAppear {
+                Task {
+                    if let group = group {
+                        // Fetch trips for the group
+                        await tripPlanViewModel.fetchTripPlansByGroupId(user: authViewModel.user, groupId: group.id)
+                    } else if let city = city {
+                        // Fetch trips for the city
+                        await tripPlanViewModel.fetchTripPlansByCityAndUser(user: authViewModel.user, cityId: city.id)
+                    } else{
+                        // Fetch trips for the user
+                        await tripPlanViewModel.fetchTripPlansByUserId(user: authViewModel.user )
+                    }
                 }
             }
         }

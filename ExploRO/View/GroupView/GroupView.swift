@@ -9,6 +9,7 @@ struct GroupView: View {
     @State private var showLeaveGroupAlert = false
     @State private var showDeleteGroupAlert = false
     @State private var showSheet = false
+    @State private var showTripPlans = false
     @State private var selectedMember: GroupUserResponse?
     var body: some View {
         VStack {
@@ -28,7 +29,27 @@ struct GroupView: View {
             .frame(height: 50)
             .padding()
             
+            
             VStack(alignment: .leading, spacing: 10) {
+                Button {
+                    showTripPlans = true
+                } label: {
+                    Text("Trip Plans")
+                        .font(.title3)
+                        .bold()
+                        .padding(.vertical, 15)
+                        .padding(.horizontal, 20)
+                        .foregroundColor(.white)
+                        .background(LinearGradient(gradient: Gradient(colors: [Color.blue, Color.purple]), startPoint: .leading, endPoint: .trailing))
+                        .cornerRadius(15)
+                        .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 5)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                }
+                .sheet(isPresented: $showTripPlans) {
+                    TripPlanListView(group: group)
+                }
+
+                
                 Text("Group Members")
                     .font(.title3)
                     .bold()
@@ -183,6 +204,6 @@ struct BottomSheet: View {
 
 
 #Preview {
-    GroupView(groupViewModel: GroupViewModel(), group: GroupResponse(id: 4, groupName: "Test Group"))
+    GroupView(groupViewModel: GroupViewModel(), group: GroupResponse(id: 41, groupName: "Test Group"))
         .environmentObject(AuthenticationViewModel1(firebaseService: FirebaseAuthentication(), authService: AuthService()))
 }

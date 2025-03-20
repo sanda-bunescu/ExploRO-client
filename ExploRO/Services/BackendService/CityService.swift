@@ -18,11 +18,12 @@ protocol CityServiceProtocol {
 
 class CityService: CityServiceProtocol{
     private let baseURL = "http://localhost:3000"
+    
     func getUserCities(idToken: String) async throws -> [CityResponse]{
         guard let url = URL(string: "\(baseURL)/get-user-cities") else {
             throw CityServiceError.invalidURL
         }
-        
+        print(url)
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         
@@ -83,13 +84,17 @@ class CityService: CityServiceProtocol{
         request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        let addCityRequest = AddCityRequest(cityID: cityID)
+        let addCityRequest = CityRequest(cityID: cityID)
         
         do {
             // Encode the AddCityRequest object to JSON
             let encoder = JSONEncoder()
             encoder.keyEncodingStrategy = .convertToSnakeCase
             let jsonData = try encoder.encode(addCityRequest)
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("JSON Payload: \(jsonString)")
+            }
+
             request.httpBody = jsonData
         } catch {
             return "Failed to encode city data"
@@ -127,16 +132,19 @@ class CityService: CityServiceProtocol{
         request.httpMethod = "DELETE"
         request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
         
-        let body: [String: Any] = ["cityID": cityID]
+        let addCityRequest = CityRequest(cityID: cityID)
+        
         do {
-            let jsonData = try JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
-            request.httpBody = jsonData
-            
+            // Encode the AddCityRequest object to JSON
+            let encoder = JSONEncoder()
+            encoder.keyEncodingStrategy = .convertToSnakeCase
+            let jsonData = try encoder.encode(addCityRequest)
             if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print("\(jsonString)")
+                print("JSON Payload: \(jsonString)")
             }
+
+            request.httpBody = jsonData
         } catch {
-            print("JSON Encoding error")
             throw CityServiceError.encodingError
         }
         

@@ -13,6 +13,7 @@ struct CityView: View {
     @Environment(\.dismiss) private var dismiss
     let city: CityResponse
     let isFavorite: Bool
+    @State private var showTripPlans = false
     
     var body: some View {
         GeometryReader{ geo in
@@ -32,6 +33,22 @@ struct CityView: View {
                             .padding(.bottom, 5)
                         Text(city.cityDescription)
                             .font(.title3)
+                    }
+                    Button{
+                        showTripPlans = true
+                    }label: {
+                        Text("View Trip Plans")
+                            .font(.headline)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .foregroundColor(.blue)
+                            .background(Color.white)
+                            .cornerRadius(10)
+                            .shadow(radius: 5)
+                    }
+                    .padding(.top, 20)
+                    .sheet(isPresented: $showTripPlans) {
+                        TripPlanListView(city: city) // Assuming `TripPlanListView` is the view to display the plans
                     }
                 }
             }
@@ -71,5 +88,5 @@ struct CityView: View {
         cityDescription: "Bucuresti, the capital of Romania",
         imageUrl: "/static/images/Bucuresti.png"
     )
-    CityView(userCityViewModel: UserCityViewModel(), city: sampleCity, isFavorite: true)
+    CityView(userCityViewModel: UserCityViewModel(), city: sampleCity, isFavorite: true).environmentObject(AuthenticationViewModel1(firebaseService: FirebaseAuthentication(), authService: AuthService()))
 }

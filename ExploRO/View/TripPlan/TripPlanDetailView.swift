@@ -1,29 +1,74 @@
 import SwiftUI
 
 struct TripPlanDetailView: View {
-    let tripPlan: TripPlan
+    var group: GroupResponse?
+    var city: CityResponse?
+    let tripPlan: TripPlanResponse
+    @ObservedObject var tripViewModel: TripPlanViewModel
+    @EnvironmentObject var authViewModel: AuthenticationViewModel1
+    @Environment(\.dismiss) var dismiss
     private var formattedStartDate: String {
         let formatter = DateFormatter()
         formatter.dateStyle = .long
-        return formatter.string(from: tripPlan.StartDate)
+        return formatter.string(from: tripPlan.startDate)
     }
     
     private var formattedEndDate: String {
         let formatter = DateFormatter()
         formatter.dateStyle = .long
-        return formatter.string(from: tripPlan.EndDate)
+        return formatter.string(from: tripPlan.endDate)
     }
     var body: some View {
-        ScrollView{
-            VStack(alignment: .leading) {
-                Text("\(tripPlan.Name) · \(formattedStartDate) - \(formattedEndDate)")
+        NavigationView{
+            ScrollView{
+                VStack(alignment: .leading) {
+                    Text("\(tripPlan.tripName) · \(formattedStartDate) - \(formattedEndDate)")
+                        .font(.headline)
+                    Text("City: \(tripPlan.cityName)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    VStack{
+                        Text("Itinerary")
+                            .bold()
+                            .font(.title)
+                        Divider()
+                    }
+                }
+                .padding()
+                Button{
+                    //perform addStopPoint
+                }label:{
+                    HStack {
+                        Image(systemName: "plus.circle")
+                        Text("Add Stop Point to Trip Plan")
+                        Spacer()
+                    }
+                    .font(.headline)
+                    .padding([.top, .horizontal])
+                    .frame(maxWidth: .infinity)
+                    .foregroundColor(.green)
+                    .cornerRadius(10)
+                }
+                //display StopPoints
                 
-                Text("Itinerary")
-                    .bold()
-                    .font(.system(size: 20))
-                Divider()
+                Button{
+                    Task{
+                        await tripViewModel.deleteTripPlan(user: authViewModel.user , tripPlanId: tripPlan.id, groupId: group?.id ?? 0, cityId: city?.id ?? 0)
+                        dismiss()
+                    }
+                }label:{
+                    HStack {
+                        Image(systemName: "trash")
+                        Text("Delete Trip Plan")
+                        Spacer()
+                    }
+                    .font(.headline)
+                    .padding([.top, .horizontal])
+                    .frame(maxWidth: .infinity)
+                    .foregroundColor(.red)
+                    .cornerRadius(10)
+                }
             }
-            .padding()
         }
     }
 }
@@ -32,12 +77,14 @@ struct TripPlanDetailView: View {
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "dd/MM/yyyy"
     
-    let mockTrip = TripPlan(
-        Name: "Bucuresti",
-        StartDate: dateFormatter.date(from: "10/07/2025") ?? Date(),
-        EndDate: dateFormatter.date(from: "15/07/2025") ?? Date(),
-        NrDays: 6
+    let mockTrip = TripPlanResponse(
+        id: 1,
+        tripName: "Bucuresti Trip",
+        startDate: dateFormatter.date(from: "10/07/2025") ?? Date(),
+        endDate: dateFormatter.date(from: "15/07/2025") ?? Date(),
+        groupName: "test",
+        cityName: "Bucuresti"
     )
     
-    return TripPlanDetailView(tripPlan: mockTrip)
+    return TripPlanDetailView(tripPlan: mockTrip, tripViewModel: TripPlanViewModel())
 }

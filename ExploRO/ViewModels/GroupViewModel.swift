@@ -7,6 +7,7 @@ class GroupViewModel: ObservableObject {
     @Published var groupMembers: [GroupUserResponse] = []
     private let groupService: GroupService
     @Published var errorMessage: String?
+    @Published var showAlert = false
     private var groupSymbols: [Int: String] = [:]
     
     @Published var searchText: String = ""
@@ -48,8 +49,10 @@ class GroupViewModel: ObservableObject {
             errorMessage = "User not authenticated"
             return
         }
-        guard !groupName.isEmpty else {
-            errorMessage = "Group name cannot be empty"
+        
+        if groupName.isEmpty {
+            errorMessage = "Please enter group name"
+            showAlert = true
             return
         }
         
@@ -57,6 +60,8 @@ class GroupViewModel: ObservableObject {
             let idToken = try await user.getIDToken()
             try await groupService.createGroup(groupName: groupName, idToken: idToken)
             await fetchGroupsByUserId(user: user)
+            errorMessage = "Group created successfully"
+            showAlert = true
         } catch {
             errorMessage = "Failed to create group"
         }
