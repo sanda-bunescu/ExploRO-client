@@ -14,6 +14,7 @@ struct CityView: View {
     let city: CityResponse
     let isFavorite: Bool
     @State private var showTripPlans = false
+    @State private var showCityAttractions = false
     
     var body: some View {
         GeometryReader{ geo in
@@ -50,6 +51,24 @@ struct CityView: View {
                     .sheet(isPresented: $showTripPlans) {
                         TripPlanListView(city: city) // Assuming `TripPlanListView` is the view to display the plans
                     }
+                    
+                    Button{
+                        showCityAttractions = true
+                    }label: {
+                        Text("City Attractions")
+                            .font(.headline)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .foregroundColor(.blue)
+                            .background(Color.white)
+                            .cornerRadius(10)
+                            .shadow(radius: 5)
+                    }
+                    .padding(.top, 20)
+                    .sheet(isPresented: $showCityAttractions) {
+                        //display a view like TouristicAttractionView
+                        //CityAttractionsView(cityId: city.id)
+                    }
                 }
             }
         }
@@ -83,7 +102,7 @@ struct CityView: View {
 
 #Preview {
     let sampleCity = CityResponse(
-        id: 1,
+        id: 29,
         cityName: "Bucuresti",
         cityDescription: "Bucuresti, the capital of Romania",
         imageUrl: "/static/images/Bucuresti.png"

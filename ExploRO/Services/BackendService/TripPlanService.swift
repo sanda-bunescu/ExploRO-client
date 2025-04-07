@@ -76,7 +76,6 @@ class TripPlanService: TripPlanServiceProtocol {
         guard let url = URL(string: "\(baseURL)/get-trips-by-group?groupId=\(groupId)") else {
             throw TripPlanError.invalidURL
         }
-        print(url)
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")

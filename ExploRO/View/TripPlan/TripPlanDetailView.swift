@@ -21,53 +21,47 @@ struct TripPlanDetailView: View {
     var body: some View {
         NavigationView{
             ScrollView{
-                VStack(alignment: .leading) {
-                    Text("\(tripPlan.tripName) · \(formattedStartDate) - \(formattedEndDate)")
-                        .font(.headline)
+                LazyVStack(alignment: .leading, spacing: 16) {
+                    HStack{
+                        Text("\(tripPlan.tripName)")
+                            .font(.headline)
+                        Spacer()
+                        Menu {
+                            Button(role: .destructive) {
+                                Task {
+                                    await tripViewModel.deleteTripPlan(
+                                        user: authViewModel.user,
+                                        tripPlanId: tripPlan.id,
+                                        groupId: group?.id ?? 0,
+                                        cityId: city?.id ?? 0
+                                    )
+                                    dismiss()
+                                }
+                            } label: {
+                                Label("Delete Trip Plan", systemImage: "trash")
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis")
+                                .font(.title2)
+                        }
+                    }
+                    Text("\(formattedStartDate) - \(formattedEndDate)")
                     Text("City: \(tripPlan.cityName)")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                     VStack{
-                        Text("Itinerary")
+                        Text("Itineraries")
                             .bold()
                             .font(.title)
                         Divider()
                     }
                 }
                 .padding()
-                Button{
-                    //perform addStopPoint
-                }label:{
-                    HStack {
-                        Image(systemName: "plus.circle")
-                        Text("Add Stop Point to Trip Plan")
-                        Spacer()
-                    }
-                    .font(.headline)
-                    .padding([.top, .horizontal])
-                    .frame(maxWidth: .infinity)
-                    .foregroundColor(.green)
-                    .cornerRadius(10)
-                }
-                //display StopPoints
                 
-                Button{
-                    Task{
-                        await tripViewModel.deleteTripPlan(user: authViewModel.user , tripPlanId: tripPlan.id, groupId: group?.id ?? 0, cityId: city?.id ?? 0)
-                        dismiss()
-                    }
-                }label:{
-                    HStack {
-                        Image(systemName: "trash")
-                        Text("Delete Trip Plan")
-                        Spacer()
-                    }
-                    .font(.headline)
-                    .padding([.top, .horizontal])
-                    .frame(maxWidth: .infinity)
-                    .foregroundColor(.red)
-                    .cornerRadius(10)
-                }
+                
+                //display StopPoints
+                ItineraryTouristicAttractionsListView(tripPlan: tripPlan)
+                
             }
         }
     }
@@ -83,7 +77,8 @@ struct TripPlanDetailView: View {
         startDate: dateFormatter.date(from: "10/07/2025") ?? Date(),
         endDate: dateFormatter.date(from: "15/07/2025") ?? Date(),
         groupName: "test",
-        cityName: "Bucuresti"
+        cityName: "Bucuresti",
+        cityId: 29
     )
     
     return TripPlanDetailView(tripPlan: mockTrip, tripViewModel: TripPlanViewModel())

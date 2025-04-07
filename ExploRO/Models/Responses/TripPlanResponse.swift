@@ -6,4 +6,5 @@ struct TripPlanResponse :Identifiable, Codable {
     var endDate: Date
     var groupName: String
     var cityName: String
+    var cityId: Int
 }

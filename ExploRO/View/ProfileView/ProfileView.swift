@@ -37,7 +37,7 @@ struct ProfileView: View {
                 
                 ExploreSurroundingsButtonView()
                 
-                ViewItinerariesView()
+                TripsView()
                 
                 CityOverviewView()
                 
