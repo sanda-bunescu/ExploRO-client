@@ -1,4 +1,4 @@
-struct Debt: Codable{
+struct DebtResponse: Codable{
     let id: Int
     let userId: String
     let userName: String

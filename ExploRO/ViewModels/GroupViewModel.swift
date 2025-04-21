@@ -5,7 +5,7 @@ import FirebaseAuth
 class GroupViewModel: ObservableObject {
     @Published var groups: [GroupResponse] = []
     @Published var groupMembers: [GroupUserResponse] = []
-    private let groupService: GroupService
+    private let groupService: GroupServiceProtocol
     @Published var errorMessage: String?
     @Published var showAlert = false
     private var groupSymbols: [Int: String] = [:]
@@ -19,7 +19,7 @@ class GroupViewModel: ObservableObject {
         }
     }
     
-    init(groupService: GroupService = GroupService()) {
+    init(groupService: GroupServiceProtocol = GroupService()) {
         self.groupService = groupService
     }
     
@@ -111,8 +111,10 @@ class GroupViewModel: ObservableObject {
             try await groupService.addUserGroup(groupId: groupId, userEmail: userEmail, idToken: idToken)
             await fetchUsersByGroupId(groupId: groupId, user: user)
             errorMessage = "User added successfully"
-        }catch{
-            errorMessage = "Failed to add user to group.\(groupService.errorMessageToShow)"
+        } catch let error as GroupError {
+            self.errorMessage = error.errorDescription
+        } catch {
+            self.errorMessage = "Unexpected error: \(error.localizedDescription)"
         }
     }
     
@@ -127,8 +129,10 @@ class GroupViewModel: ObservableObject {
             try await groupService.deleteUserGroup(groupId: groupId, userEmail: userEmail, idToken: idToken)
             await fetchUsersByGroupId(groupId: groupId, user: user)
             errorMessage = "User deleted successfully"
-        }catch{
-            errorMessage = "Failed to delete user from group.\(groupService.errorMessageToShow)"
+        } catch let error as GroupError {
+            self.errorMessage = error.errorDescription
+        } catch {
+            self.errorMessage = "Unexpected error: \(error.localizedDescription)"
         }
     }
 
@@ -146,8 +150,10 @@ class GroupViewModel: ObservableObject {
             let idToken = try await user.getIDToken()
             try await groupService.deleteUserGroup(groupId: groupId, userEmail: userEmail, idToken: idToken)
             await fetchGroupsByUserId(user: user)
-        }catch{
-            errorMessage = "Failed to leave group.\(groupService.errorMessageToShow)"
+        } catch let error as GroupError {
+            self.errorMessage = error.errorDescription
+        } catch {
+            self.errorMessage = "Unexpected error: \(error.localizedDescription)"
         }
     }
     

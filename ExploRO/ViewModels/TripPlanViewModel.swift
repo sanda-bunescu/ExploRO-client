@@ -4,13 +4,13 @@ import FirebaseAuth
 @MainActor
 class TripPlanViewModel: ObservableObject{
     @Published var tripPlans: [TripPlanResponse] = []
-    private let tripPlanService: TripPlanService
+    private let tripPlanService: TripPlanServiceProtocol
     @Published var errorMessage: String?
     @Published var showAlert = false
 
     
     
-    init (tripPlanService: TripPlanService = TripPlanService()) {
+    init (tripPlanService: TripPlanServiceProtocol = TripPlanService()) {
         self.tripPlanService = tripPlanService
     }
     

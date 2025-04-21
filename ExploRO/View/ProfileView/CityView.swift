@@ -67,7 +67,7 @@ struct CityView: View {
                     .padding(.top, 20)
                     .sheet(isPresented: $showCityAttractions) {
                         //display a view like TouristicAttractionView
-                        //CityAttractionsView(cityId: city.id)
+                        TouristicAttractionListView(cityId: city.id)
                     }
                 }
             }
