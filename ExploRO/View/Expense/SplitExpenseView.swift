@@ -36,7 +36,14 @@ struct SplitExpenseView: View {
                             Spacer()
                             TextField("Amount", text: Binding(
                                 get: { manualAmounts[member.userId] ?? "" },
-                                set: { manualAmounts[member.userId] = $0 }
+                                set: { newValue in
+                                    let sanitized = newValue.replacingOccurrences(of: ",", with: ".")
+                                    let pattern = #"^\d*(\.\d{0,2})?$"#
+                                    
+                                    if sanitized.isEmpty || sanitized.range(of: pattern, options: .regularExpression) != nil {
+                                        manualAmounts[member.userId] = sanitized
+                                    }
+                                }
                             ))
                             .keyboardType(.decimalPad)
                             .frame(width: 100)
@@ -47,19 +54,17 @@ struct SplitExpenseView: View {
             
             Button("Save Expense") {
                 if request.type == "Split Equally" {
-                    print("Saving expense with request: \(request)")
-                    print(selectedUserIds)
                     Task{
                         await expenseViewModel.saveExpensesEqually(expense: request, selectedUserIds: selectedUserIds, user: authViewModel.user )
                     }
                 } else {
-                    print("Saving expense with request: \(request)")
-                    print(manualAmounts)
                     Task{
-                        await expenseViewModel.saveExpensesManually(expense: request, manualAmounts: manualAmounts, user: authViewModel.user )
+                        let success = await expenseViewModel.saveExpensesManually(expense: request, manualAmounts: manualAmounts, user: authViewModel.user )
+                        if success {
+                            dismiss()
+                        }
                     }
                 }
-                dismiss()
             }
             .disabled(
                 (request.type == "Split Equally" && selectedUserIds.isEmpty) ||
@@ -67,6 +72,11 @@ struct SplitExpenseView: View {
             )
         }
         .navigationTitle("Split Details")
+        .alert("Error", isPresented: $expenseViewModel.showAlert, actions: {
+            Button("OK", role: .cancel) {}
+        }, message: {
+            Text(expenseViewModel.errorMessage ?? "Something went wrong.")
+        })
     }
 }
 
@@ -79,11 +89,11 @@ struct SplitExpenseView: View {
         date: Date(),
         amount: 45.50,
         description: "Team dinner at restaurant",
-        type: "Split Equally", // or "Split Equally"
+        type: "Split Manually", // or "Split Equally"
         debtors: []
     )
-
-     return SplitExpenseView(
+    
+    return SplitExpenseView(
         expenseViewModel: ExpenseViewModel(),
         request: mockRequest,
         members: [
