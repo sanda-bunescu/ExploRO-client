@@ -13,6 +13,19 @@ struct ExpenseListView: View {
                     Text("No expenses found.")
                         .foregroundColor(.gray)
                 } else {
+                    NavigationLink(destination: UserDebtsView(expenseViewModel: expenseViewModel, groupId: groupId)) {
+                            HStack {
+                                Image(systemName: "dollarsign.circle")
+                                Text("View Debts")
+                                    .fontWeight(.semibold)
+                            }
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.blue.opacity(0.1))
+                            .foregroundColor(.blue)
+                            .cornerRadius(10)
+                            .padding(.horizontal)
+                        }
                     List(expenseViewModel.expenses, id: \.id) { expense in
                         NavigationLink(destination: ExpenseView(expense: expense, expenseViewModel: expenseViewModel)) {
                             VStack(alignment: .leading, spacing: 6) {

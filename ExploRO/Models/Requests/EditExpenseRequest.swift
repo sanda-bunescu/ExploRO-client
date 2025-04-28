@@ -6,7 +6,7 @@ struct EditExpenseRequest: Codable {
     var type: String
     var date: Date
     var description: String
-    var debtors: [DebtResponse]
+    var debtors: [DebtRequest]
 }
 
 extension EditExpenseRequest {
@@ -17,6 +17,11 @@ extension EditExpenseRequest {
         self.type = response.type
         self.date = response.date
         self.description = response.description
-        self.debtors = response.debtors ?? []
+        self.debtors = (response.debtors ?? []).map {
+            DebtRequest(
+                userId: $0.userId,
+                amountToPay: $0.amountToPay
+            )
+        }
     }
 }

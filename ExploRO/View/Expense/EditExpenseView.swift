@@ -6,7 +6,7 @@ struct EditExpenseView: View {
     @ObservedObject var viewModel: ExpenseViewModel
     @State var editRequest: EditExpenseRequest
     @State private var showDebtorsEditor = false
-
+    let groupId: Int
 
     var body: some View {
         Form {
@@ -25,14 +25,15 @@ struct EditExpenseView: View {
                 showDebtorsEditor = true
             }
             .sheet(isPresented: $showDebtorsEditor) {
-                EditSplitExpenseView(editRequest: $editRequest)
+                EditSplitExpenseView(editRequest: $editRequest, viewModel: viewModel, groupId: groupId)
             }
 
 
 
             Button("Save") {
                 Task {
-                    // Handle save action here if needed
+                    await viewModel.editExpense(expense: editRequest, user: authViewModel.user, groupId: groupId)
+                    
                     dismiss()
                 }
             }
@@ -51,13 +52,13 @@ struct EditExpenseView: View {
         date: Date(),
         description: "Shared lunch with group",
         debtors: [
-            DebtResponse(id: 1, userId: "user_1", userName: "Alice", amountToPay: 6.33),
-            DebtResponse(id: 2, userId: "user_2", userName: "Bob", amountToPay: 6.33)
+            DebtRequest(userId: "user_1", amountToPay: 6.33),
+            DebtRequest(userId: "user_2", amountToPay: 6.33)
         ]
     )
 
     return NavigationView {
-        EditExpenseView(viewModel: ExpenseViewModel(), editRequest: sampleRequest).environmentObject(AuthenticationViewModel1(firebaseService: FirebaseAuthentication(), authService: AuthService()))
+        EditExpenseView(viewModel: ExpenseViewModel(), editRequest: sampleRequest, groupId: 1).environmentObject(AuthenticationViewModel1(firebaseService: FirebaseAuthentication(), authService: AuthService()))
 
     }
 }

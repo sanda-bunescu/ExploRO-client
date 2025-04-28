@@ -2,20 +2,18 @@ import SwiftUI
 
 struct EditSplitExpenseView: View {
     @StateObject private var groupViewModel = GroupViewModel()
+    @Environment(\.dismiss) private var dismiss
     @Binding var editRequest: EditExpenseRequest
-    let members: [GroupUserResponse] = [
-        .init(userId: "1", userName: "Alice", userEmail: "alice@email.com"),
-        .init(userId: "2", userName: "Bob", userEmail: "bob@email.com"),
-        .init(userId: "3", userName: "Charlie", userEmail: "charlie@email.com")
-    ]
-    
+    @ObservedObject var viewModel: ExpenseViewModel
+    @EnvironmentObject var authViewModel: AuthenticationViewModel1
+    let groupId: Int
     @State private var selectedUserIds: Set<String> = []
     @State private var manualAmounts: [String: String] = [:]
     var body: some View {
         if editRequest.type == "Split Equally" {
             Section(header: Text("Select Members to Split With")) {
-                ForEach(members, id: \.userId) { member in
-                    Toggle(member.userName, isOn: Binding(
+                ForEach(groupViewModel.groupMembers, id: \.userId) { member in
+                    Toggle(member.userName.isEmpty ? member.userEmail : member.userName, isOn: Binding(
                         get: {
                             selectedUserIds.contains(member.userId) ||
                             editRequest.debtors.contains { $0.userId == member.userId }
@@ -23,32 +21,28 @@ struct EditSplitExpenseView: View {
                         set: { isOn in
                             if isOn {
                                 selectedUserIds.insert(member.userId)
-                                if !(editRequest.debtors.contains(where: { $0.userId == member.userId })) {
-                                    let debt = DebtResponse(id: UUID().hashValue, userId: member.userId, userName: member.userName, amountToPay: 0)
-                                    editRequest.debtors.append(debt)
-                                }
                             } else {
                                 selectedUserIds.remove(member.userId)
-                                editRequest.debtors.removeAll { $0.userId == member.userId }
                             }
+                            viewModel.updateSplitEquallyDebtors(selectedUserIds: selectedUserIds, totalAmount: editRequest.amount, editRequest: &editRequest)
                         }
                     ))
                 }
             }
         }else if editRequest.type == "Split Manually" {
             Section(header: Text("Assign Manual Amounts")) {
-                ForEach(members, id: \.userId) { member in
+                ForEach(groupViewModel.groupMembers, id: \.userId) { member in
                     HStack {
-                        Text(member.userName)
+                        Text(member.userName.isEmpty ? member.userEmail : member.userName)
                         Spacer()
                         let userId = member.userId
                         let currentAmountString = {
                             if let debt = editRequest.debtors.first(where: { $0.userId == userId }) {
                                 return String(format: "%.2f", debt.amountToPay)
                             }
-                            return manualAmounts[userId] ?? ""
+                            return ""
                         }()
-
+                        
                         let amountBinding = Binding<String>(
                             get: { currentAmountString },
                             set: { newValue in
@@ -59,7 +53,7 @@ struct EditSplitExpenseView: View {
                                         updatedDebtors[index].amountToPay = amount
                                         editRequest.debtors = updatedDebtors
                                     } else {
-                                        let newDebt = DebtResponse(id: UUID().hashValue, userId: userId, userName: member.userName, amountToPay: amount)
+                                        let newDebt = DebtRequest(userId: userId, amountToPay: amount)
                                         editRequest.debtors.append(newDebt)
                                     }
                                 }else {
@@ -67,7 +61,7 @@ struct EditSplitExpenseView: View {
                                 }
                             }
                         )
-
+                        
                         TextField("Amount", text: amountBinding)
                             .keyboardType(.decimalPad)
                             .frame(width: 80)
@@ -77,21 +71,42 @@ struct EditSplitExpenseView: View {
             }
         }
         Section {
-            Button{
-                print(editRequest)
-            }label:{
+            let totalDebtAmount = editRequest.debtors.reduce(0) { $0 + $1.amountToPay }
+            let amountsMatch = abs(totalDebtAmount - editRequest.amount) < 0.01
+            
+            Button {
+                Task {
+                    await viewModel.editExpense(expense: editRequest, user: authViewModel.user, groupId: groupId)
+                    dismiss()
+                }
+            } label: {
                 Text("Save")
                     .padding()
-                    .background(Color.accentColor)
+                    .background(amountsMatch ? Color.accentColor : Color.gray)
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }
+            .disabled(!amountsMatch)
+            
+            if !amountsMatch {
+                Text("The total of all debts (\(String(format: "%.2f", totalDebtAmount))) must equal the expense amount (\(String(format: "%.2f", editRequest.amount))).")
+                    .foregroundColor(.red)
+                    .font(.caption)
+            }
         }
-
+        
+        .onAppear {
+            Task {
+                await groupViewModel.fetchUsersByGroupId(groupId: groupId, user: authViewModel.user)
+                if editRequest.type == "Split Equally" {
+                    selectedUserIds = Set(editRequest.debtors.map { $0.userId })
+                    viewModel.updateSplitEquallyDebtors(selectedUserIds: selectedUserIds, totalAmount: editRequest.amount, editRequest: &editRequest)
+                }
+                
+            }
+        }
         
     }
-    
-    
 }
 
 #Preview {
@@ -103,9 +118,9 @@ struct EditSplitExpenseView: View {
         date: Date(),
         description: "Team dinner",
         debtors: [
-            DebtResponse(id: 1, userId: "1", userName: "Alice", amountToPay: 30.0),
-            DebtResponse(id: 2, userId: "2", userName: "Bob", amountToPay: 30.0)
+            DebtRequest(userId: "1", amountToPay: 30.0),
+            DebtRequest(userId: "2", amountToPay: 30.0)
         ]
     )
-    EditSplitExpenseView(editRequest: $sampleRequest)
+    EditSplitExpenseView(editRequest: $sampleRequest, viewModel: ExpenseViewModel(), groupId: 1).environmentObject(AuthenticationViewModel1(firebaseService: FirebaseAuthentication(), authService: AuthService()))
 }

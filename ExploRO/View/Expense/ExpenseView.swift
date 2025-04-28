@@ -3,7 +3,9 @@ import SwiftUI
 struct ExpenseView: View {
     let expense: ExpenseResponse
     @ObservedObject var expenseViewModel: ExpenseViewModel
+    @EnvironmentObject var authViewModel: AuthenticationViewModel1
     @State private var isEditing = false
+    @State private var showDeleteConfirmation = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -83,11 +85,27 @@ struct ExpenseView: View {
             Button("Edit") {
                 isEditing = true
             }
+            Button("Delete") {
+                showDeleteConfirmation = true
+            }
         }
         .sheet(isPresented: $isEditing) {
             EditExpenseView(
                 viewModel: expenseViewModel,
-                editRequest: EditExpenseRequest(from: expense)
+                editRequest: EditExpenseRequest(from: expense),
+                groupId: expense.groupId
+            )
+        }
+        .alert(isPresented: $showDeleteConfirmation) {
+            Alert(
+                title: Text("Delete Expense"),
+                message: Text("Are you sure you want to delete this expense? This action cannot be undone."),
+                primaryButton: .destructive(Text("Delete")) {
+                    Task{
+                        await expenseViewModel.deleteExpense(expense: expense, user: authViewModel.user)
+                    }
+                },
+                secondaryButton: .cancel()
             )
         }
     }
@@ -112,5 +130,7 @@ struct ExpenseView: View {
 
      NavigationView {
         ExpenseView(expense: sampleExpense, expenseViewModel: ExpenseViewModel())
+         
+             .environmentObject(AuthenticationViewModel1(firebaseService: FirebaseAuthentication(), authService: AuthService()))
     }
 }
