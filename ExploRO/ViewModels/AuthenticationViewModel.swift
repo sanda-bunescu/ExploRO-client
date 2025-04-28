@@ -38,34 +38,34 @@ class AuthenticationViewModel1: ObservableObject {
             errorMessage = "Please fill in all fields"
             return
         }
-        authenticationState = .authenticating
+        //authenticationState = .authenticating
         do {
             let firUser = try await firebaseService.loginWithEmailAndPassword(with: email, password: password)
             self.user = firUser
-            authenticationState = .authenticated
             if let idToken = try? await firUser.getIDToken() {
-                backendService.sendIdTokenToBackend(idToken: idToken, for: .loginUser)
+                _ = try await backendService.sendIdTokenToBackend(idToken: idToken, username: nil, for: .loginUser)
             }
             errorMessage = ""
-        } catch {
+            authenticationState = .authenticated
+        }  catch{
             authenticationState = .unauthenticated
-            errorMessage = "Wrong email or password";
+            errorMessage = "Wrong email or password"
         }
     }
     
-    func register(email: String, password: String) async {
-        if email.isEmpty || password.isEmpty {
+    func register(username: String, email: String, password: String) async {
+        if username.isEmpty || email.isEmpty || password.isEmpty {
             errorMessage = "Please fill in all fields"
             return
         }
         do {
             let firUser = try await firebaseService.registerWithEmailAndPassword(with: email, password: password)
             self.user = firUser
-            authenticationState = .authenticated
             if let idToken = try? await firUser.getIDToken() {
-                backendService.sendIdTokenToBackend(idToken: idToken, for: .createUser)
+                _ = try await backendService.sendIdTokenToBackend(idToken: idToken, username: username, for: .createUser)
             }
             errorMessage = nil
+            authenticationState = .authenticated
         } catch let error as NSError {
             authenticationState = .unauthenticated
             errorMessage = mapFirebaseAuthError(error)
@@ -85,7 +85,7 @@ class AuthenticationViewModel1: ObservableObject {
     func deleteUser() async {
         do {
             if let idToken = try? await user?.getIDToken() {
-                backendService.sendIdTokenToBackend(idToken: idToken, for: .deleteUser)
+                _ = try await backendService.sendIdTokenToBackend(idToken: idToken, username: nil, for: .deleteUser)
                 print(idToken)
             }
             try await firebaseService.deleteUser()
@@ -100,11 +100,11 @@ class AuthenticationViewModel1: ObservableObject {
     func loginWithGoogle() async {
         do {
             let firUser = try await firebaseService.loginWithGoogle()
-            authenticationState = .authenticated
             if let idToken = try? await firUser.getIDToken() {
-                backendService.sendIdTokenToBackend(idToken: idToken, for: .createUser)
+                _ = try await backendService.sendIdTokenToBackend(idToken: idToken, username: nil, for: .createUser)
             }
             self.user = firUser
+            authenticationState = .authenticated
         } catch {
             authenticationState = .unauthenticated
         }
@@ -113,11 +113,11 @@ class AuthenticationViewModel1: ObservableObject {
     func loginWithFacebook() async {
         do {
             let firUser = try await firebaseService.loginWithFacebook()
-            authenticationState = .authenticated
             if let idToken = try? await firUser.getIDToken() {
-                backendService.sendIdTokenToBackend(idToken: idToken, for: .createUser)
+                _ = try await backendService.sendIdTokenToBackend(idToken: idToken, username: nil, for: .createUser)
             }
             self.user = firUser
+            authenticationState = .authenticated
         } catch {
             authenticationState = .unauthenticated
         }

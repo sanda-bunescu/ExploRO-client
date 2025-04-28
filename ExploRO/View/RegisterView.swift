@@ -4,22 +4,26 @@ import SwiftUI
 struct RegisterView: View {
     @EnvironmentObject var authViewModel: AuthenticationViewModel1
     
+    @State private var username = ""
     @State private var email = ""
     @State private var password = ""
     var body: some View {
         GeometryReader{geo1 in
             VStack{
-                if let errorMessage = authViewModel.errorMessage{
-                    Text(errorMessage)
-                            .foregroundStyle(.red)
-                }
+                TextFieldView(fieldName: "Username", fieldData: $username)
                 TextFieldView(fieldName: "Email", fieldData: $email)
                 
                 TextFieldView(fieldName: "Password", fieldData: $password)
-                
+                if let errorMessage = authViewModel.errorMessage{
+                    Text(errorMessage)
+                        .font(.system(size: 14))
+                            .foregroundStyle(.red)
+                            .padding(.top, 20)
+                            .padding(.bottom, -25)
+                }
                 Button("Register"){
                     Task {
-                        await authViewModel.register(email: email, password: password)
+                        await authViewModel.register(username: username, email: email, password: password)
                     }
                 }
                 .frame(maxWidth: geo1.size.width * 0.91, minHeight: 50)
@@ -28,7 +32,7 @@ struct RegisterView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 15.0))
                 .shadow(radius: 2, x: 0, y: 4)
                 .font(.custom("Poppins", size: 18))
-                .padding(.top,15)
+                .padding(.top,25)
                 
                 HStack {
                     VStack{

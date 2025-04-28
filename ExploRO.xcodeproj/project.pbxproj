@@ -24,6 +24,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		A74046A02DBFBC8F00E9FBC2 /* Common */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Common; sourceTree = "<group>"; };
 		A79D5B402D637946004CCDD0 /* Core */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Core; sourceTree = "<group>"; };
 		A79D5B412D63797A004CCDD0 /* Models */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Models; sourceTree = "<group>"; };
 		A79D5B422D6379A1004CCDD0 /* Resources */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Resources; sourceTree = "<group>"; };
@@ -78,6 +79,7 @@
 		A7F7033D2C9038CC001F5254 /* ExploRO */ = {
 			isa = PBXGroup;
 			children = (
+				A74046A02DBFBC8F00E9FBC2 /* Common */,
 				A7B949902C9418AC0083C141 /* ExploRO.entitlements */,
 				A76F61782C92D0AD000F2F7C /* Info.plist */,
 				A7F7033E2C9038CC001F5254 /* ExploROApp.swift */,
@@ -109,6 +111,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				A74046A02DBFBC8F00E9FBC2 /* Common */,
 				A79D5B402D637946004CCDD0 /* Core */,
 				A79D5B412D63797A004CCDD0 /* Models */,
 				A79D5B422D6379A1004CCDD0 /* Resources */,

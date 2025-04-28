@@ -6,8 +6,7 @@ struct UserResponse : Codable{
 }
 
 struct BackendUser: Codable {
-    let ID: Int
-    let FirebaseId: String
+    let Id: String
     let Name: String?
     let Email: String?
     let CreatedAt: String

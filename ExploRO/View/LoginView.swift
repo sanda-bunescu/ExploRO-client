@@ -10,10 +10,6 @@ struct LoginView: View {
     var body: some View {
         GeometryReader { geo1 in
             VStack {
-                if let errorMessage = authViewModel.errorMessage{
-                    Text(errorMessage)
-                            .foregroundStyle(.red)
-                }
                 TextFieldView(fieldName: "Email", fieldData: $email)
                 TextFieldView(fieldName: "Password", fieldData: $password)
                 
@@ -26,7 +22,12 @@ struct LoginView: View {
                     .font(.custom("Poppins", size: 15))
                 }
                 .padding(.trailing)
-                
+                if let errorMessage = authViewModel.errorMessage{
+                    Text(errorMessage)
+                        .font(.system(size: 14))
+                        .foregroundStyle(.red)
+                        .padding(.bottom, -10)
+                }
                 Button("Login") {
                     Task {
                         await authViewModel.login(email: email, password: password)
@@ -73,7 +74,7 @@ struct LoginView: View {
                     Button {
                         Task{
                             await authViewModel.loginWithFacebook()
-                           
+                            
                         }
                     } label: {
                         Image("facebook")

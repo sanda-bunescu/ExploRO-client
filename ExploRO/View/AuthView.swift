@@ -3,20 +3,29 @@ import SwiftUI
 
 class AuthViewModel: ObservableObject {
     @Published var showLoginPage = true
-    @Published var rectangleSize = 0.6
-   
+    @Published var rectangleSize: CGFloat
+        
+        init() {
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                self.rectangleSize = 0.45
+            } else {
+                self.rectangleSize = 0.6
+            }
+        }
+
     
     func toggleToLogin() {
         withAnimation(.easeInOut) {
             showLoginPage = true
-            rectangleSize = 0.6
+            rectangleSize = UIDevice.current.userInterfaceIdiom == .pad ? 0.45 : 0.6
         }
     }
     
     func toggleToRegister() {
         withAnimation(.easeInOut) {
             showLoginPage = false
-            rectangleSize = 0.7
+            rectangleSize = UIDevice.current.userInterfaceIdiom == .pad ? 0.5 : 0.7
+                
         }
     }
 }
