@@ -1,4 +1,3 @@
-
 import FirebaseAuth
 import Foundation
 import SwiftUI
@@ -14,6 +13,7 @@ class AuthenticationViewModel1: ObservableObject {
     @Published var authenticationState: AuthenticationState = .unauthenticated
     @Published var user: User?
     @Published var errorMessage : String?
+    @Published var successMessage : String?
     
     private let firebaseService: FirebaseAuthenticationProtocol
     private let backendService: AuthServiceProtocol
@@ -43,7 +43,7 @@ class AuthenticationViewModel1: ObservableObject {
             let firUser = try await firebaseService.loginWithEmailAndPassword(with: email, password: password)
             self.user = firUser
             if let idToken = try? await firUser.getIDToken() {
-                _ = try await backendService.sendIdTokenToBackend(idToken: idToken, username: nil, for: .loginUser)
+                _ = try await backendService.sendIdTokenToBackend(idToken: idToken, for: .loginUser)
             }
             errorMessage = ""
             authenticationState = .authenticated
@@ -60,9 +60,15 @@ class AuthenticationViewModel1: ObservableObject {
         }
         do {
             let firUser = try await firebaseService.registerWithEmailAndPassword(with: email, password: password)
-            self.user = firUser
+            let changeRequest = firUser.createProfileChangeRequest()
+            changeRequest.displayName = username
+            try await changeRequest.commitChanges()
+            
+            try await firUser.reload()
+            
+            self.user = Auth.auth().currentUser
             if let idToken = try? await firUser.getIDToken() {
-                _ = try await backendService.sendIdTokenToBackend(idToken: idToken, username: username, for: .createUser)
+                _ = try await backendService.sendIdTokenToBackend(idToken: idToken, for: .createUser)
             }
             errorMessage = nil
             authenticationState = .authenticated
@@ -85,8 +91,7 @@ class AuthenticationViewModel1: ObservableObject {
     func deleteUser() async {
         do {
             if let idToken = try? await user?.getIDToken() {
-                _ = try await backendService.sendIdTokenToBackend(idToken: idToken, username: nil, for: .deleteUser)
-                print(idToken)
+                _ = try await backendService.sendIdTokenToBackend(idToken: idToken, for: .deleteUser)
             }
             try await firebaseService.deleteUser()
             try firebaseService.logout()
@@ -101,7 +106,7 @@ class AuthenticationViewModel1: ObservableObject {
         do {
             let firUser = try await firebaseService.loginWithGoogle()
             if let idToken = try? await firUser.getIDToken() {
-                _ = try await backendService.sendIdTokenToBackend(idToken: idToken, username: nil, for: .createUser)
+                _ = try await backendService.sendIdTokenToBackend(idToken: idToken, for: .createUser)
             }
             self.user = firUser
             authenticationState = .authenticated
@@ -114,7 +119,7 @@ class AuthenticationViewModel1: ObservableObject {
         do {
             let firUser = try await firebaseService.loginWithFacebook()
             if let idToken = try? await firUser.getIDToken() {
-                _ = try await backendService.sendIdTokenToBackend(idToken: idToken, username: nil, for: .createUser)
+                _ = try await backendService.sendIdTokenToBackend(idToken: idToken, for: .createUser)
             }
             self.user = firUser
             authenticationState = .authenticated
@@ -126,7 +131,6 @@ class AuthenticationViewModel1: ObservableObject {
     func reauthenticateUserWithEmailAndPassword(email: String, password: String) async throws -> Bool{
         do{
             user = try await firebaseService.reauthenticateUserWithEmailAndPassword(with: email, password: password)
-            errorMessage = ""
             return true
         }catch{
             errorMessage = "Wrong email or password"
@@ -154,6 +158,21 @@ class AuthenticationViewModel1: ObservableObject {
         }
         
     }
+    
+    func resetPassword(email: String) async {
+        guard !email.isEmpty else {
+            self.errorMessage = "Please enter your email address."
+            return
+        }
+        
+        do {
+            try await firebaseService.sendPasswordReset(to: email)
+            self.successMessage = "Password reset email sent."
+        } catch {
+            self.errorMessage = "Failed to send password reset email. Please check your email and try again."
+        }
+    }
+    
     
     func verifyUserProvider(provider: String) -> Bool {
         guard let user = Auth.auth().currentUser else {

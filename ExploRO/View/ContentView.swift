@@ -16,7 +16,7 @@ struct ContentView: View {
         }else{
             switch authViewModel.authenticationState {
             case .authenticated:
-                ProfileView()
+                HomeView()
             case .authenticating:
                 ProgressView("Authenticating...")
                     .progressViewStyle(CircularProgressViewStyle())

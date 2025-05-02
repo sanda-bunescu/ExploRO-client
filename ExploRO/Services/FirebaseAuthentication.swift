@@ -30,6 +30,7 @@ protocol FirebaseAuthenticationProtocol {
     func reauthenticateUserWithGoogle() async throws -> User
     func loginWithFacebook() async throws -> User
     func reauthenticateUserWithFacebook() async throws -> User
+    func sendPasswordReset(to email: String) async throws
 }
 
 class FirebaseAuthentication: FirebaseAuthenticationProtocol {
@@ -255,4 +256,15 @@ class FirebaseAuthentication: FirebaseAuthenticationProtocol {
         }
     }
     
+    func sendPasswordReset(to email: String) async throws {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            Auth.auth().sendPasswordReset(withEmail: email) { error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
+    }
 }

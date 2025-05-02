@@ -7,11 +7,11 @@ enum BackendAction{
 }
 
 protocol AuthServiceProtocol {
-    func sendIdTokenToBackend(idToken: String, username: String?, for action: BackendAction) async throws -> UserResponse
+    func sendIdTokenToBackend(idToken: String, for action: BackendAction) async throws -> UserResponse
 }
 
 class AuthService: AuthServiceProtocol {
-    func sendIdTokenToBackend(idToken: String, username: String?, for action: BackendAction) async throws -> UserResponse {
+    func sendIdTokenToBackend(idToken: String, for action: BackendAction) async throws -> UserResponse {
         print(idToken)
         var urlString: String
         switch action {
@@ -29,14 +29,6 @@ class AuthService: AuthServiceProtocol {
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-
-        if action == .createUser, let username = username {
-            let body: [String: Any] = [
-                "username": username
-            ]
-            request.httpBody = try JSONSerialization.data(withJSONObject: body)
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        }
 
         request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
 
