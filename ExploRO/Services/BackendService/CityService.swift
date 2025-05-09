@@ -23,7 +23,6 @@ class CityService: CityServiceProtocol{
         guard let url = URL(string: "\(baseURL)/get-user-cities") else {
             throw CityServiceError.invalidURL
         }
-        print(url)
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         
@@ -39,7 +38,6 @@ class CityService: CityServiceProtocol{
             decoder.keyDecodingStrategy = .convertFromSnakeCase
             
             let citiesResponse = try decoder.decode([String: [CityResponse]].self, from: data)
-            
             return citiesResponse["user_cities"] ?? []
         }catch CityServiceError.requestFailed{
             throw CityServiceError.requestFailed
@@ -139,10 +137,7 @@ class CityService: CityServiceProtocol{
             let encoder = JSONEncoder()
             encoder.keyEncodingStrategy = .convertToSnakeCase
             let jsonData = try encoder.encode(addCityRequest)
-            if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print("JSON Payload: \(jsonString)")
-            }
-
+            
             request.httpBody = jsonData
         } catch {
             throw CityServiceError.encodingError

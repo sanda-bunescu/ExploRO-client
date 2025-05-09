@@ -121,14 +121,6 @@ struct ReauthenticateUserSheetView: View {
                 }
                 .navigationBarTitleDisplayMode(.inline)
                 .navigationTitle("Reauthenticate")
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button("Close", systemImage: "xmark") {
-                            dismiss()
-                        }
-                        .tint(.black)
-                    }
-                }
                 .onAppear {
                     authViewModel.errorMessage = nil
                     authViewModel.successMessage = nil

@@ -82,4 +82,5 @@ struct TripPlanDetailView: View {
     )
     
     return TripPlanDetailView(tripPlan: mockTrip, tripViewModel: TripPlanViewModel())
+        .environmentObject(AuthenticationViewModel1(firebaseService: FirebaseAuthentication(), authService: AuthService()))
 }

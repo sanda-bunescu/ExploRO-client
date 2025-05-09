@@ -7,7 +7,7 @@ struct CreateGroupView: View {
     @EnvironmentObject var authViewModel: AuthenticationViewModel1
     var body: some View {
         ZStack {
-            Image("Intro")
+            Image("GroupImage")
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()

@@ -59,5 +59,5 @@ struct TouristicAttractionListView: View {
 }
 
 #Preview {
-    TouristicAttractionListView(cityId: 29)
+    TouristicAttractionListView(cityId: 57)
 }

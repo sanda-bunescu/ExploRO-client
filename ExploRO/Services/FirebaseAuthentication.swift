@@ -7,7 +7,6 @@ import Foundation
 
 enum FirebaseErrorCode: Error {
     case invalidEmail
-    case invalidPassword
     case invalidUser
     case invalidCredentials
     case invalidToken
@@ -31,6 +30,7 @@ protocol FirebaseAuthenticationProtocol {
     func loginWithFacebook() async throws -> User
     func reauthenticateUserWithFacebook() async throws -> User
     func sendPasswordReset(to email: String) async throws
+    func changePassword(user: User?, to newPassword: String) async throws
 }
 
 class FirebaseAuthentication: FirebaseAuthenticationProtocol {
@@ -43,7 +43,6 @@ class FirebaseAuthentication: FirebaseAuthenticationProtocol {
     }
     func registerWithEmailAndPassword(with email: String, password: String) async throws -> User{
         let authResult = try await Auth.auth().createUser(withEmail: email, password: password)
-        print("I am hereeee: registerWithEmailAndPassword")
         return authResult.user
     }
     func logout() throws{
@@ -267,4 +266,17 @@ class FirebaseAuthentication: FirebaseAuthenticationProtocol {
             }
         }
     }
+    
+    func changePassword(user: User?, to newPassword: String) async throws {
+        guard let user = user else {
+            throw FirebaseErrorCode.invalidUser
+        }
+        
+        do {
+            try await user.updatePassword(to: newPassword)
+        } catch {
+            throw error
+        }
+    }
+
 }

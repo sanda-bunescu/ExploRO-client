@@ -33,9 +33,9 @@ class TripPlanService: TripPlanServiceProtocol {
             let decoder = JSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase
             decoder.dateDecodingStrategy = .iso8601
-            let tripsResponse = try decoder.decode([String: [TripPlanResponse]].self, from: data)
+            let tripsWrapper = try decoder.decode(TripsWrapper.self, from: data)
             
-            return tripsResponse["trips"] ?? []
+            return tripsWrapper.trips ?? []
         } catch {
             throw TripPlanError.requestFailed
         }
@@ -64,9 +64,9 @@ class TripPlanService: TripPlanServiceProtocol {
             let decoder = JSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase
             decoder.dateDecodingStrategy = .iso8601
-            let tripsResponse = try decoder.decode([String: [TripPlanResponse]].self, from: data)
+            let tripsWrapper = try decoder.decode(TripsWrapper.self, from: data)
             
-            return tripsResponse["trips"] ?? []
+            return tripsWrapper.trips ?? []
         } catch {
             throw TripPlanError.requestFailed
         }
@@ -82,7 +82,6 @@ class TripPlanService: TripPlanServiceProtocol {
         
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
-            
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 throw TripPlanError.requestFailed
             }
@@ -90,9 +89,9 @@ class TripPlanService: TripPlanServiceProtocol {
             let decoder = JSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase
             decoder.dateDecodingStrategy = .iso8601
-            let tripsResponse = try decoder.decode([String: [TripPlanResponse]].self, from: data)
+            let tripsWrapper = try decoder.decode(TripsWrapper.self, from: data)
             
-            return tripsResponse["trips"] ?? []
+            return tripsWrapper.trips ?? []
         } catch {
             throw TripPlanError.requestFailed
         }

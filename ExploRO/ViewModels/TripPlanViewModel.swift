@@ -52,13 +52,9 @@ class TripPlanViewModel: ObservableObject{
         
         do {
             let idToken = try await user.getIDToken()
-            print(idToken)
             let fetchedTrips = try await tripPlanService.fetchTripPlansByGroupId(idToken: idToken, groupId: groupId)
-            
             tripPlans = fetchedTrips
-            print(tripPlans.count)
         } catch {
-            print("i am in catch")
             errorMessage = "Failed to fetch trips"
         }
     }

@@ -103,7 +103,7 @@ struct ItineraryTouristicAttractionView: View {
 
     ItineraryTouristicAttractionView(
         itinerary: ItineraryResponse(id: 1, dayNr: 1),
-        tripPlan: TripPlanResponse(id: 1, tripName: "Test trip", startDate: Date(), endDate: Date(), groupName: "TestGroup", cityName: "Bucharest", cityId: 29),
+        tripPlan: TripPlanResponse(id: 1, tripName: "Test trip", startDate: Date(), endDate: Date(), groupName: "TestGroup", cityName: "Bucharest", cityId: 57),
         itineraryList: $emptyItineraryList // Pass a binding to the state variable
     )
 }

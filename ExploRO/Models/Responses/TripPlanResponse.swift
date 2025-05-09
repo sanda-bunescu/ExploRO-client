@@ -1,4 +1,8 @@
 import Foundation
+struct TripsWrapper: Decodable {
+    let trips: [TripPlanResponse]?
+}
+
 struct TripPlanResponse :Identifiable, Codable {
     let id: Int
     var tripName: String

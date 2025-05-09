@@ -8,7 +8,6 @@ class GroupViewModel: ObservableObject {
     private let groupService: GroupServiceProtocol
     @Published var errorMessage: String?
     @Published var showAlert = false
-    private var groupSymbols: [Int: String] = [:]
     
     @Published var searchText: String = ""
     var searchResults: [GroupResponse]{
@@ -30,12 +29,14 @@ class GroupViewModel: ObservableObject {
         }
         do {
             let idToken = try await user.getIDToken()
-            let fetchedGroups = try await groupService.fetchGroupsByUserId(idToken: idToken)
+            var fetchedGroups = try await groupService.fetchGroupsByUserId(idToken: idToken)
             
-            for group in fetchedGroups {
-                if groupSymbols[group.id] == nil {
-                    groupSymbols[group.id] = randomSFSymbol()
+            fetchedGroups = fetchedGroups.map { group in
+                var modifiedGroup = group
+                if let imageUrl = group.imageUrl, !imageUrl.isEmpty {
+                    modifiedGroup.imageUrl = "http://localhost:3000\(imageUrl)"
                 }
+                return modifiedGroup
             }
             
             self.groups = fetchedGroups
@@ -157,11 +158,4 @@ class GroupViewModel: ObservableObject {
         }
     }
     
-    private func randomSFSymbol() -> String {
-        let symbols = ["airplane", "map", "car.2", "globe.europe.africa.fill", "rainbow", "mountain.2", "leaf"]
-        return symbols.randomElement() ?? "map"
-    }
-    func symbol(for group: GroupResponse) -> String {
-        return groupSymbols[group.id] ?? "person.3"
-    }
 }

@@ -8,123 +8,124 @@ struct TripPlanListView: View {
     @EnvironmentObject var authViewModel: AuthenticationViewModel1
     @State private var showCreateTripView = false
     @StateObject private var tripPlanViewModel = TripPlanViewModel()
+    
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 15) {
-                    
-                    if let groupName = group?.groupName {
-                        VStack{
-                            Text("Trips for Group: \(groupName)")
-                                .font(.headline)
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemGray6)))
-                        }.padding(.horizontal)
-                    }
-                    
-                    ForEach(tripPlanViewModel.tripPlans, id: \.id) { trip in
-                        VStack(spacing: 15) {
-                            HStack {
-                                VStack(alignment: .leading){
-                                    Text(trip.tripName)
-                                        .font(.title2)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.primary)
-                                    Text(trip.cityName)
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                
-                                NavigationLink(destination: TripPlanDetailView(group: group, city: city, tripPlan: trip, tripViewModel: TripPlanViewModel())) {
-                                    ZStack {
-                                        Circle()
-                                            .fill(Color.gray.opacity(0.2))
-                                            .frame(width: 36, height: 36)
-                                        
-                                        Image(systemName: "chevron.right")
-                                            .font(.system(size: 16, weight: .bold))
-                                            .foregroundColor(.blue)
-                                    }
-                                }
-                                
-                            }
-                            
-                            HStack {
-                                Spacer()
-                                
-                                VStack(alignment: .trailing){
-                                    Text("From \(trip.startDate, style: .date)")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                    
-                                    Text("To \(trip.endDate, style: .date)")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
+            VStack(spacing: 0) {
+                if tripPlanViewModel.tripPlans.isEmpty {
+                    Spacer()
+                    VStack(spacing: 16) {
+                        Image(systemName: "airplane.departure")
+                            .font(.system(size: 40))
+                            .foregroundColor(.gray)
+                        
+                        Text("No trips found.")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        Button(action: {
+                            showCreateTripView = true
+                        }) {
+                            Label("Create Your First Trip", systemImage: "plus")
                         }
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 15)
-                                .fill(Color.blue.opacity(0.15))
-                                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-                        )
-                        .padding(.horizontal)
+                        .buttonStyle(.borderedProminent)
                     }
-                    
-                    Button{
-                        //display create
-                        showCreateTripView = true
-                    }label:{
-                        HStack{
-                            Image(systemName: "plus.circle.fill")
-                            Text("Create Trip Plan")
-                        }
-                    }
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                    .padding(.horizontal)
+                    Spacer()
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 16) {
+                            ForEach(tripPlanViewModel.tripPlans, id: \.id) { trip in
+                                NavigationLink(destination: TripPlanDetailView(group: group, city: city, tripPlan: trip, tripViewModel: TripPlanViewModel())) {
+                                    TripCardView(trip: trip)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+                        }
+                        .padding(.horizontal)
+                        .padding(.top)
+                    }
                 }
-                .padding(.top)
             }
             .navigationTitle("Trip Plans")
+
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        showCreateTripView = true
+                    }) {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
             .sheet(isPresented: $showCreateTripView) {
                 NavigationStack {
-                    if let group = group {
-                        CreateTripPlanView(group: group,
-                                           city: city, tripViewModel: tripPlanViewModel)
-                    } else if let city = city {
-                        CreateTripPlanView(group: group,
-                                           city: city, tripViewModel: tripPlanViewModel)
-                    } else{
-                        CreateTripPlanView(group: group,
-                                           city: city, tripViewModel: tripPlanViewModel)
-                    }
+                    CreateTripPlanView(group: group, city: city, tripViewModel: tripPlanViewModel)
                 }
             }
             .onAppear {
                 Task {
                     if let group = group {
-                        // Fetch trips for the group
                         await tripPlanViewModel.fetchTripPlansByGroupId(user: authViewModel.user, groupId: group.id)
                     } else if let city = city {
-                        // Fetch trips for the city
                         await tripPlanViewModel.fetchTripPlansByCityAndUser(user: authViewModel.user, cityId: city.id)
-                    } else{
-                        // Fetch trips for the user
-                        await tripPlanViewModel.fetchTripPlansByUserId(user: authViewModel.user )
+                    } else {
+                        await tripPlanViewModel.fetchTripPlansByUserId(user: authViewModel.user)
                     }
                 }
             }
         }
     }
 }
+
+
+
+struct TripCardView: View {
+    let trip: TripPlanResponse
+
+    var body: some View {
+        HStack(spacing: 12) {
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color.blue)
+                .frame(width: 4)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(trip.tripName)
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+
+                Text(trip.cityName)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+
+                HStack(spacing: 8) {
+                    Label("\(trip.startDate.formatted(date: .abbreviated, time: .omitted))", systemImage: "calendar")
+                    Text("–")
+                    Label("\(trip.endDate.formatted(date: .abbreviated, time: .omitted))", systemImage: "calendar")
+                }
+                .font(.caption)
+                .foregroundColor(.gray)
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .foregroundColor(.gray)
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.3), radius: 3, x: 0, y: 2)
+        )
+    }
+}
+
+
+
+
+
 
 #Preview {
     TripPlanListView()

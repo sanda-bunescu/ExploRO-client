@@ -33,7 +33,7 @@ class UserCityViewModel: ObservableObject {
             self.cities = fetchedCities
         } catch {
             print("Error fetching cities: \(error)")
-            errorMessage = "Failed to fetch cities"
+            errorMessage = "Failed to fetch user cities"
         }
     }
     
@@ -48,7 +48,7 @@ class UserCityViewModel: ObservableObject {
             let message = try await cityService.addCity(cityID: cityID, idToken: user.getIDToken())
             errorMessage = message
             if message == "City added successfully" {
-                await fetchUserCities(user: user)
+                //await fetchUserCities(user: user)
                 errorMessage = message//this is not an error, is just success message
                 showAlert = true
             } else {
@@ -67,10 +67,10 @@ class UserCityViewModel: ObservableObject {
             errorMessage = "User not authenticated"
             return
         }
-        print("CityId is now: \(cityID)")
         do {
             try await cityService.deleteCity(cityID: cityID, idToken: user.getIDToken())
-            print("City deleted successfully")
+            errorMessage = "City deleted successfully"
+            showAlert = true
             await fetchUserCities(user: user)
         } catch {
             print("Failed to delete city: \(error)")

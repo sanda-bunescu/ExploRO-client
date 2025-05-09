@@ -102,6 +102,6 @@ struct AttractionCardView: View {
 }
 
 #Preview {
-    CityAttractionsView(stopPointViewModel: StopPointViewModel(), cityId: 29, itineraryId: 1, tripPlanId: 39)
+    CityAttractionsView(stopPointViewModel: StopPointViewModel(), cityId: 57, itineraryId: 1, tripPlanId: 39)
         .environmentObject(AuthenticationViewModel1(firebaseService: FirebaseAuthentication(), authService: AuthService()))
 }

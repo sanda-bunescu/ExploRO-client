@@ -64,7 +64,7 @@ class GroupService: GroupServiceProtocol {
             let decoder = JSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase
             let groupsResponse = try decoder.decode([String: [GroupResponse]].self, from: data)
-            
+
             return groupsResponse["user_groups"] ?? []
         } catch let error as GroupError {
             throw error

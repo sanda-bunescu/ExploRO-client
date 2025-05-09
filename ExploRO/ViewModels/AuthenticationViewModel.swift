@@ -138,6 +138,18 @@ class AuthenticationViewModel1: ObservableObject {
         }
         
     }
+    
+    func reauthenticateUserWithPassword(email: String, password: String) async throws -> User?{
+        do{
+            user = try await firebaseService.reauthenticateUserWithEmailAndPassword(with: email, password: password)
+            return user
+        }catch{
+            errorMessage = "Wrong password"
+            return nil
+        }
+        
+    }
+    
     func reauthenticateUserWithGoogle() async throws  -> Bool{
         do{
             user = try await firebaseService.reauthenticateUserWithGoogle()
@@ -172,6 +184,40 @@ class AuthenticationViewModel1: ObservableObject {
             self.errorMessage = "Failed to send password reset email. Please check your email and try again."
         }
     }
+    
+    func changePassword(currentPassword: String, newPassword: String) async {
+        guard let user = Auth.auth().currentUser,
+              let email = user.email else {
+            self.errorMessage = "User not logged in."
+            return
+        }
+        
+        if currentPassword.isEmpty || newPassword.isEmpty {
+            self.errorMessage = "Please fill out both fields."
+            return
+        }
+        
+        if currentPassword.elementsEqual(newPassword) {
+            self.errorMessage = "Please choose a new password different from your current one."
+            return
+        }
+        
+        do {
+            guard let reauthenticatedUser = try await reauthenticateUserWithPassword(email: email, password: currentPassword) else {
+                return
+            }
+            
+            try await firebaseService.changePassword(user: reauthenticatedUser, to: newPassword)
+            
+            self.successMessage = "Password changed successfully."
+            self.errorMessage = nil
+        } catch {
+            self.errorMessage = "An unexpected error occurred. Please try again."
+            self.successMessage = nil
+        }
+    }
+    
+    
     
     
     func verifyUserProvider(provider: String) -> Bool {
