@@ -10,7 +10,7 @@ struct NewExpenseView: View {
     
     @State private var request = NewExpenseRequest(
         name: "",
-        groupId: 0, // Will assign this properly in .onAppear
+        groupId: 0,
         payerId: "",
         date: Date(),
         amount: 0.0,
@@ -20,54 +20,85 @@ struct NewExpenseView: View {
     )
     
     @State private var stringAmount = ""
-    @State private var stringPayerId = ""
-    @State private var goToSplitExpense = false
     
     var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Expense Info")) {
-                    TextField("Name", text: $request.name)
-                    TextField("Amount", text: $stringAmount)
-                        .keyboardType(.decimalPad)
-                        .onChange(of: stringAmount) {
-                            request.amount = Double(stringAmount) ?? 0.0
-                        }
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("Create New Expense")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .padding(.bottom, 10)
                     
-                    TextField("Description", text: $request.description)
-                    
-                    Picker("Type", selection: $request.type) {
-                        Text("None").tag("None")
-                        Text("Split Equally").tag("Split Equally")
-                        Text("Split Manually").tag("Split Manually")
+                    Group {
+                        CustomTextField(title: "Name", text: $request.name)
+                        
+                        CustomTextField(title: "Amount", text: $stringAmount, keyboardType: .decimalPad)
+                            .onChange(of: stringAmount) {
+                                request.amount = Double(stringAmount) ?? 0.0
+                            }
+                        
+                        CustomTextField(title: "Description", text: $request.description)
                     }
                     
-                    Picker("Payer", selection: $request.payerId) {
-                        Text("None").tag("None")
-                        ForEach(groupViewModel.groupMembers, id: \.userId) { member in
-                            Text(member.userName.isEmpty ? member.userEmail : member.userName)
-                                        .tag(member.userId)
-                            
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Type")
+                            .font(.headline)
+                        Picker("Type", selection: $request.type) {
+                            Text("None").tag("None")
+                            Text("Split Equally").tag("Split Equally")
+                            Text("Split Manually").tag("Split Manually")
                         }
+                        .pickerStyle(SegmentedPickerStyle())
                     }
                     
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Payer")
+                            .font(.headline)
+                        Menu {
+                            ForEach(groupViewModel.groupMembers, id: \.userId) { member in
+                                Button {
+                                    request.payerId = member.userId
+                                } label: {
+                                    Text(member.userName.isEmpty ? member.userEmail : member.userName)
+                                }
+                            }
+                        } label: {
+                            HStack {
+                                Text(displayPayerName())
+                                Spacer()
+                                Image(systemName: "chevron.down")
+                            }
+                            .padding()
+                            .background(Color(.secondarySystemBackground))
+                            .cornerRadius(10)
+                        }
+                    }
                     
                     DatePicker("Date", selection: $request.date, displayedComponents: .date)
+                        .datePickerStyle(.compact)
+                        .padding()
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(10)
+                    
+                    NavigationLink {
+                        SplitExpenseView(
+                            expenseViewModel: expenseViewModel,
+                            request: request,
+                            members: groupViewModel.groupMembers
+                        )
+                    } label: {
+                        Text("Next")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(isNextDisabled ? Color.gray : Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .disabled(isNextDisabled)
                 }
-                
-                NavigationLink{
-                    SplitExpenseView(expenseViewModel: expenseViewModel, request: request, members: groupViewModel.groupMembers)
-                }label: {
-                    Text("Next")
-                        .foregroundStyle(Color.blue)
-                }
-                .disabled(request.name.isEmpty ||
-                          request.amount <= 0 ||
-                          request.payerId.isEmpty ||
-                          request.type.elementsEqual("None") ||
-                          request.payerId.elementsEqual("None"))
+                .padding()
             }
-            .navigationTitle("New Expense")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -81,12 +112,43 @@ struct NewExpenseView: View {
                     await groupViewModel.fetchUsersByGroupId(groupId: groupId, user: authViewModel.user)
                 }
             }
-
         }
-        
+    }
+    
+    private var isNextDisabled: Bool {
+        request.name.isEmpty ||
+        request.amount <= 0 ||
+        request.payerId.isEmpty ||
+        request.type == "None"
+    }
+    
+    private func displayPayerName() -> String {
+        if let payer = groupViewModel.groupMembers.first(where: { $0.userId == request.payerId }) {
+            return payer.userName.isEmpty ? payer.userEmail : payer.userName
+        }
+        return "Select Payer"
     }
 }
 
+struct CustomTextField: View {
+    var title: String
+    @Binding var text: String
+    var keyboardType: UIKeyboardType = .default
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text(title)
+                .font(.headline)
+            TextField(title, text: $text)
+                .keyboardType(keyboardType)
+                .padding()
+                .background(Color(.secondarySystemBackground))
+                .cornerRadius(10)
+        }
+    }
+}
+
+
 #Preview {
-    NewExpenseView(expenseViewModel: ExpenseViewModel(), groupId: 45).environmentObject(AuthenticationViewModel1(firebaseService: FirebaseAuthentication(), authService: AuthService()))
+    NewExpenseView(expenseViewModel: ExpenseViewModel(), groupId: 87).environmentObject(AuthenticationViewModel1(firebaseService: FirebaseAuthentication(), authService: AuthService()))
 }

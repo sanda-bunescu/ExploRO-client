@@ -86,7 +86,7 @@ class TripPlanViewModel: ObservableObject{
         do{
             let idToken = try await user.getIDToken()
             try await tripPlanService.createTripPlan(idToken: idToken, tripPlan: createTripPlanRequest)
-            
+            print("Created trip, groupId: \(baseGroupId) cityId: \(baseCityId)")
             if baseGroupId != 0 {
                 await fetchTripPlansByGroupId(user: user, groupId: baseGroupId)
             }
@@ -94,6 +94,7 @@ class TripPlanViewModel: ObservableObject{
                 await fetchTripPlansByCityAndUser(user: user, cityId: baseCityId)
             }
             if baseGroupId == 0 && baseCityId == 0{
+                print("I am here")
                 await fetchTripPlansByUserId(user: user)
             }
             errorMessage = "Trip plan created successfully"

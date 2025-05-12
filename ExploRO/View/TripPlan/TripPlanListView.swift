@@ -11,44 +11,46 @@ struct TripPlanListView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                if tripPlanViewModel.tripPlans.isEmpty {
-                    Spacer()
-                    VStack(spacing: 16) {
-                        Image(systemName: "airplane.departure")
-                            .font(.system(size: 40))
-                            .foregroundColor(.gray)
-                        
-                        Text("No trips found.")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        
-                        Button(action: {
-                            showCreateTripView = true
-                        }) {
-                            Label("Create Your First Trip", systemImage: "plus")
-                        }
-                        .buttonStyle(.borderedProminent)
-                    }
-                    .padding()
-                    Spacer()
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 16) {
-                            ForEach(tripPlanViewModel.tripPlans, id: \.id) { trip in
-                                NavigationLink(destination: TripPlanDetailView(group: group, city: city, tripPlan: trip, tripViewModel: TripPlanViewModel())) {
-                                    TripCardView(trip: trip)
-                                }
-                                .buttonStyle(PlainButtonStyle())
+            ZStack {
+                Color(hex: "#E2F1E5").ignoresSafeArea() // Always fill background
+
+                VStack {
+                    if tripPlanViewModel.tripPlans.isEmpty {
+                        Spacer()
+                        VStack(spacing: 16) {
+                            Image(systemName: "airplane.departure")
+                                .font(.system(size: 40))
+                                .foregroundColor(.gray)
+
+                            Text("No trips found.")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+
+                            Button(action: {
+                                showCreateTripView = true
+                            }) {
+                                Label("Create Your First Trip", systemImage: "plus")
                             }
+                            .buttonStyle(.borderedProminent)
                         }
-                        .padding(.horizontal)
-                        .padding(.top)
+                        .padding()
+                        Spacer()
+                    } else {
+                        ScrollView {
+                            LazyVStack {
+                                ForEach(tripPlanViewModel.tripPlans, id: \.id) { trip in
+                                    NavigationLink(destination: TripPlanDetailView(group: group, city: city, tripPlan: trip, tripViewModel: TripPlanViewModel())) {
+                                        TripCardView(trip: trip)
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
                     }
                 }
             }
             .navigationTitle("Trip Plans")
-
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
@@ -82,24 +84,24 @@ struct TripPlanListView: View {
 
 struct TripCardView: View {
     let trip: TripPlanResponse
-
+    
     var body: some View {
-        HStack(spacing: 12) {
+        HStack{
             RoundedRectangle(cornerRadius: 4)
-                .fill(Color.blue)
+                .fill(Color(red: 57/255, green: 133/255, blue: 72/255))
                 .frame(width: 4)
-
+            
             VStack(alignment: .leading, spacing: 6) {
                 Text(trip.tripName)
                     .font(.title3)
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
-
+                
                 Text(trip.cityName)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-
-                HStack(spacing: 8) {
+                
+                HStack {
                     Label("\(trip.startDate.formatted(date: .abbreviated, time: .omitted))", systemImage: "calendar")
                     Text("–")
                     Label("\(trip.endDate.formatted(date: .abbreviated, time: .omitted))", systemImage: "calendar")
@@ -107,9 +109,9 @@ struct TripCardView: View {
                 .font(.caption)
                 .foregroundColor(.gray)
             }
-
+            
             Spacer()
-
+            
             Image(systemName: "chevron.right")
                 .foregroundColor(.gray)
         }
@@ -121,10 +123,6 @@ struct TripCardView: View {
         )
     }
 }
-
-
-
-
 
 
 #Preview {

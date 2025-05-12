@@ -1,30 +1,35 @@
 import SwiftUI
 
 struct TripPlanDetailView: View {
+    @EnvironmentObject var authViewModel: AuthenticationViewModel1
     var group: GroupResponse?
     var city: CityResponse?
     let tripPlan: TripPlanResponse
     @ObservedObject var tripViewModel: TripPlanViewModel
-    @EnvironmentObject var authViewModel: AuthenticationViewModel1
     @Environment(\.dismiss) var dismiss
+
     private var formattedStartDate: String {
         let formatter = DateFormatter()
-        formatter.dateStyle = .long
+        formatter.dateStyle = .medium
         return formatter.string(from: tripPlan.startDate)
     }
-    
+
     private var formattedEndDate: String {
         let formatter = DateFormatter()
-        formatter.dateStyle = .long
+        formatter.dateStyle = .medium
         return formatter.string(from: tripPlan.endDate)
     }
+
     var body: some View {
-        NavigationView{
-            ScrollView{
-                LazyVStack(alignment: .leading, spacing: 16) {
-                    HStack{
-                        Text("\(tripPlan.tripName)")
-                            .font(.headline)
+        ScrollView {
+            VStack(spacing: 24) {
+                
+                // Trip Overview
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Text(tripPlan.tripName)
+                            .font(.title)
+                            .fontWeight(.semibold)
                         Spacer()
                         Menu {
                             Button(role: .destructive) {
@@ -38,41 +43,49 @@ struct TripPlanDetailView: View {
                                     dismiss()
                                 }
                             } label: {
-                                Label("Delete Trip Plan", systemImage: "trash")
+                                Label("Delete", systemImage: "trash")
                             }
                         } label: {
-                            Image(systemName: "ellipsis")
+                            Image(systemName: "ellipsis.circle")
                                 .font(.title2)
+                                .foregroundColor(.primary)
                         }
                     }
-                    Text("\(formattedStartDate) - \(formattedEndDate)")
-                    Text("City: \(tripPlan.cityName)")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    VStack{
-                        Text("Itineraries")
-                            .bold()
-                            .font(.title)
-                        Divider()
+                    
+                    HStack(spacing: 10) {
+                        Label(formattedStartDate, systemImage: "calendar")
+                        Text("→")
+                        Label(formattedEndDate, systemImage: "calendar")
                     }
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+
+                    Label("City: \(tripPlan.cityName)", systemImage: "mappin.and.ellipse")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+
                 }
                 .padding()
-                
-                
-                //display StopPoints
+                .background(Color(.systemGray6))
+                .cornerRadius(16)
+                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
                 ItineraryTouristicAttractionsListView(tripPlan: tripPlan)
                 
             }
+            .padding()
         }
+        .navigationTitle("Trip Details")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
+
 
 #Preview {
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "dd/MM/yyyy"
     
     let mockTrip = TripPlanResponse(
-        id: 1,
+        id: 49,
         tripName: "Bucuresti Trip",
         startDate: dateFormatter.date(from: "10/07/2025") ?? Date(),
         endDate: dateFormatter.date(from: "15/07/2025") ?? Date(),
@@ -81,6 +94,5 @@ struct TripPlanDetailView: View {
         cityId: 29
     )
     
-    return TripPlanDetailView(tripPlan: mockTrip, tripViewModel: TripPlanViewModel())
-        .environmentObject(AuthenticationViewModel1(firebaseService: FirebaseAuthentication(), authService: AuthService()))
+    return TripPlanDetailView(tripPlan: mockTrip, tripViewModel: TripPlanViewModel()).environmentObject(AuthenticationViewModel1(firebaseService: FirebaseAuthentication(), authService: AuthService()))
 }

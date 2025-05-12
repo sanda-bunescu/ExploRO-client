@@ -12,73 +12,124 @@ struct SplitExpenseView: View {
     @State private var manualAmounts: [String: String] = [:]
     
     var body: some View {
-        Form {
-            if request.type == "Split Equally" {
-                Section(header: Text("Select Members to Split With")) {
-                    ForEach(members, id: \.userId) { member in
-                        Toggle(member.userName.isEmpty ? member.userEmail : member.userName, isOn: Binding(
-                            get: { selectedUserIds.contains(member.userId) },
-                            set: { isOn in
-                                if isOn {
-                                    selectedUserIds.insert(member.userId)
-                                } else {
-                                    selectedUserIds.remove(member.userId)
-                                }
-                            }
-                        ))
-                    }
-                }
-            } else {
-                Section(header: Text("Manual Amounts Per Member")) {
-                    ForEach(members, id: \.userId) { member in
-                        HStack {
-                            Text(member.userName.isEmpty ? member.userEmail : member.userName)
-                            Spacer()
-                            TextField("Amount", text: Binding(
-                                get: { manualAmounts[member.userId] ?? "" },
-                                set: { newValue in
-                                    let sanitized = newValue.replacingOccurrences(of: ",", with: ".")
-                                    let pattern = #"^\d*(\.\d{0,2})?$"#
-                                    
-                                    if sanitized.isEmpty || sanitized.range(of: pattern, options: .regularExpression) != nil {
-                                        manualAmounts[member.userId] = sanitized
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                Text("Split Details")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                
+                if request.type == "Split Equally" {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Select Members to Split With")
+                            .font(.headline)
+                        
+                        ForEach(members, id: \.userId) { member in
+                            Toggle(isOn: Binding(
+                                get: { selectedUserIds.contains(member.userId) },
+                                set: { isOn in
+                                    if isOn {
+                                        selectedUserIds.insert(member.userId)
+                                    } else {
+                                        selectedUserIds.remove(member.userId)
                                     }
                                 }
-                            ))
-                            .keyboardType(.decimalPad)
-                            .frame(width: 100)
+                            )) {
+                                Text(memberDisplayName(member))
+                                    .font(.body)
+                            }
+                            .toggleStyle(SwitchToggleStyle(tint: .blue))
+                            .padding()
+                            .background(Color(.secondarySystemBackground))
+                            .cornerRadius(10)
                         }
-                    }
-                }
-            }
-            
-            Button("Save Expense") {
-                if request.type == "Split Equally" {
-                    Task{
-                        await expenseViewModel.saveExpensesEqually(expense: request, selectedUserIds: selectedUserIds, user: authViewModel.user )
                     }
                 } else {
-                    Task{
-                        let success = await expenseViewModel.saveExpensesManually(expense: request, manualAmounts: manualAmounts, user: authViewModel.user )
-                        if success {
-                            dismiss()
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Manual Amounts Per Member")
+                            .font(.headline)
+                        
+                        ForEach(members, id: \.userId) { member in
+                            HStack {
+                                Text(memberDisplayName(member))
+                                Spacer()
+                                TextField("Amount", text: Binding(
+                                    get: { manualAmounts[member.userId] ?? "" },
+                                    set: { newValue in
+                                        let sanitized = newValue.replacingOccurrences(of: ",", with: ".")
+                                        let pattern = #"^\d*(\.\d{0,2})?$"#
+                                        
+                                        if sanitized.isEmpty || sanitized.range(of: pattern, options: .regularExpression) != nil {
+                                            manualAmounts[member.userId] = sanitized
+                                        }
+                                    }
+                                ))
+                                .keyboardType(.decimalPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 100)
+                                .padding(8)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(8)
+                            }
+                            .padding()
+                            .background(Color(.secondarySystemBackground))
+                            .cornerRadius(10)
                         }
                     }
                 }
+
+                Button(action: saveExpense) {
+                    Text("Save Expense")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(isSaveDisabled ? Color.gray : Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .disabled(isSaveDisabled)
             }
-            .disabled(
-                (request.type == "Split Equally" && selectedUserIds.isEmpty) ||
-                (request.type == "Split Manually" && manualAmounts.values.allSatisfy { $0.isEmpty })
-            )
+            .padding()
         }
         .navigationTitle("Split Details")
-        .alert("Error", isPresented: $expenseViewModel.showAlert, actions: {
+        .alert("Error", isPresented: $expenseViewModel.showAlert) {
             Button("OK", role: .cancel) {}
-        }, message: {
+        } message: {
             Text(expenseViewModel.errorMessage ?? "Something went wrong.")
-        })
+        }
+    }
+    
+    private func memberDisplayName(_ member: GroupUserResponse) -> String {
+        member.userName.isEmpty ? member.userEmail : member.userName
+    }
+    
+    private var isSaveDisabled: Bool {
+        (request.type == "Split Equally" && selectedUserIds.isEmpty) ||
+        (request.type == "Split Manually" && manualAmounts.values.allSatisfy { $0.isEmpty })
+    }
+    
+    private func saveExpense() {
+        if request.type == "Split Equally" {
+            Task {
+                await expenseViewModel.saveExpensesEqually(
+                    expense: request,
+                    selectedUserIds: selectedUserIds,
+                    user: authViewModel.user
+                )
+            }
+        } else {
+            Task {
+                let success = await expenseViewModel.saveExpensesManually(
+                    expense: request,
+                    manualAmounts: manualAmounts,
+                    user: authViewModel.user
+                )
+                if success {
+                    dismiss()
+                }
+            }
+        }
     }
 }
+
 
 
 #Preview {

@@ -1,22 +1,27 @@
-//
-//  ContentView.swift
-//  FirebaseSignIn
-//
-//  Created by Sanda Bunescu on 10.09.2024.
-//
-
 import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var authViewModel: AuthenticationViewModel1
     @AppStorage("hasSeenIntro") var hasSeenIntro: Bool = false
+    @State private var selectedTab: TabItem = .home
     var body: some View {
         if !hasSeenIntro {
             IntroView(hasSeenIntro: $hasSeenIntro)
         }else{
             switch authViewModel.authenticationState {
             case .authenticated:
-                HomeView()
+                ToolbarContainer(selectedTab: $selectedTab) {
+                    switch selectedTab {
+                    case .home:
+                        HomeView()
+                    case .trips:
+                        TripPlanListView()
+                    case .groups:
+                        GroupListView()
+                    case .profile:
+                        ProfileView()
+                    }
+                }
             case .authenticating:
                 ProgressView("Authenticating...")
                     .progressViewStyle(CircularProgressViewStyle())

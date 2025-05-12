@@ -5,7 +5,7 @@ struct HomeView: View {
     @StateObject private var locationManager = LocationManager()
     @State private var showingSheet = false
     @ObservedObject var weatherViewModel = WeatherViewModel()
-    private let weatherService = WeatherService()
+    //private let weatherService = WeatherService()
     @State private var searchText = ""
     let maxStretchHeight = UIScreen.main.bounds.height / 2
     let baseHeight: CGFloat = 300
@@ -63,8 +63,17 @@ struct HomeView: View {
                     .padding()
             }
             .ignoresSafeArea(edges: .top)
+            .background(Color(hex: "#E2F1E5").ignoresSafeArea())
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    NavigationLink(destination: ProfileView()) {
+                        Image(systemName: "person.crop.circle")
+                            .font(.system(size: 25))
+                            .foregroundStyle(.white)
+                    }
+                }
+            }
         }
-
     }
 }
 

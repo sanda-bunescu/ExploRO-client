@@ -114,17 +114,16 @@ struct ExpenseView: View {
 
 #Preview {
     let sampleExpense = ExpenseResponse(
-        id: 1,
+        id: 21,
         name: "Lunch at Cafe",
-        groupId: 45,
+        groupId: 87,
         payerUserName: "payerUser",
         date: Date(),
         amount: 18.99,
         description: "Shared lunch expense after team meeting",
-        type: "Food",
+        type: "Split Manually",
         debtors: [
-            DebtResponse(id: 1, userId: "userId1", userName: "testUser",amountToPay: 6.33),
-            DebtResponse(id: 2, userId: "userId2", userName: "testUser2",amountToPay: 6.33)
+            DebtResponse(id: 51, userId: "exHywIWyPyZbdwW2NrSFeE68QF33", userName: "testUser",amountToPay: 100)
         ]
     )
 

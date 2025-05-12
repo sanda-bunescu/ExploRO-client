@@ -8,40 +8,80 @@ struct EditExpenseView: View {
     @State private var showDebtorsEditor = false
     let groupId: Int
 
+    init(viewModel: ExpenseViewModel, editRequest: EditExpenseRequest, groupId: Int) {
+        self.viewModel = viewModel
+        self._editRequest = State(initialValue: editRequest)
+        self.groupId = groupId
+    }
+
     var body: some View {
-        Form {
-            Section(header: Text("Basic Info")) {
-                TextField("Name", text: $editRequest.name)
-                TextField("Amount", value: $editRequest.amount, formatter: NumberFormatter())
-                Picker("Type", selection: $editRequest.type) {
-                    Text("Split Equally").tag("Split Equally")
-                    Text("Split Manually").tag("Split Manually")
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("Edit Expense")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+
+                    CustomTextField(title: "Name", text: $editRequest.name)
+
+                    CustomTextField(title: "Description", text: $editRequest.description)
+
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Date")
+                            .font(.headline)
+                        DatePicker("", selection: $editRequest.date, displayedComponents: .date)
+                            .datePickerStyle(.compact)
+                            .padding()
+                            .background(Color(.secondarySystemBackground))
+                            .cornerRadius(10)
+                    }
+
+                    Button("Edit Debtors") {
+                        showDebtorsEditor = true
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue.opacity(0.1))
+                    .foregroundColor(.blue)
+                    .cornerRadius(10)
+                    .sheet(isPresented: $showDebtorsEditor) {
+                        EditSplitExpenseView(
+                            editRequest: $editRequest,
+                            viewModel: viewModel,
+                            groupId: groupId
+                        )
+                    }
+
+                    Button("Save") {
+                        Task {
+                            await viewModel.editExpense(
+                                expense: editRequest,
+                                user: authViewModel.user,
+                                groupId: groupId
+                            )
+                            dismiss()
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
                 }
-                DatePicker("Date", selection: $editRequest.date, displayedComponents: .date)
-                TextField("Description", text: $editRequest.description)
+                .padding()
             }
-
-            Button("Edit Debtors") {
-                showDebtorsEditor = true
-            }
-            .sheet(isPresented: $showDebtorsEditor) {
-                EditSplitExpenseView(editRequest: $editRequest, viewModel: viewModel, groupId: groupId)
-            }
-
-
-
-            Button("Save") {
-                Task {
-                    await viewModel.editExpense(expense: editRequest, user: authViewModel.user, groupId: groupId)
-                    
-                    dismiss()
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
                 }
             }
         }
-        .navigationTitle("Edit Expense")
-        
     }
 }
+
 
 #Preview {
     let sampleRequest = EditExpenseRequest(

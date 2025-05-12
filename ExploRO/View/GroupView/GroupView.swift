@@ -3,12 +3,16 @@ import SwiftUI
 struct GroupView: View {
     @EnvironmentObject var authViewModel: AuthenticationViewModel1
     @ObservedObject var groupViewModel: GroupViewModel
-    @Environment(\.dismiss) private var dismiss
-    let group: GroupResponse
     @State private var showSheet = false
     @State private var showTripPlans = false
     @State private var showExpensesView = false
     @State private var selectedMember: GroupUserResponse?
+    let group: GroupResponse
+    @Environment(\.dismiss) var dismiss
+    
+    @StateObject private var expenseViewModel = ExpenseViewModel()
+    @StateObject private var tripPlanViewModel = TripPlanViewModel()
+    
     var body: some View {
         ScrollView {
             ZStack(alignment: .topTrailing) {
@@ -27,35 +31,7 @@ struct GroupView: View {
                     }
                 }
                 .frame(height: 200)
-
-                HStack(spacing: 12) {
-                    Button(action: {
-                        dismiss() // custom back
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                                .font(.title2)
-                            Text("Back")
-                                .font(.subheadline)
-                        }
-                        .foregroundColor(.white)
-                        .padding(10)
-                        .background(Color.black.opacity(0.5))
-                        .clipShape(Capsule())
-                    }
-                    Spacer()
-                    NavigationLink(destination: GroupSettings(groupViewModel: groupViewModel, group: group)) {
-                        Image(systemName: "gearshape.fill")
-                            .font(.title2)
-                            .foregroundColor(.white)
-                            .padding(10)
-                            .background(Color.black.opacity(0.5))
-                            .clipShape(Circle())
-                    }
-                }
-                .padding(16)
-
-
+                
                 HStack {
                     AsyncImage(url: URL(string: group.imageUrl ?? "")) { image in
                         image
@@ -72,13 +48,13 @@ struct GroupView: View {
                                 .foregroundColor(.gray)
                         }
                     }
-
+                    
                     Text(group.groupName)
                         .font(.title2)
                         .bold()
                         .foregroundColor(.white)
                         .shadow(radius: 5)
-
+                    
                     Spacer()
                 }
                 .padding(.horizontal)
@@ -94,61 +70,117 @@ struct GroupView: View {
                     alignment: .bottom
                 )
             }
-
             
-            VStack(spacing: 16) {
-                VStack(alignment: .leading, spacing: 10) {
-                    Button {
-                        showTripPlans = true
-                    } label: {
-                        Text("Trip Plans")
-                            .font(.title3)
-                            .bold()
-                            .padding(.vertical, 15)
-                            .padding(.horizontal, 20)
-                            .foregroundColor(.white)
-                            .background(LinearGradient(gradient: Gradient(colors: [Color.blue, Color.purple]), startPoint: .leading, endPoint: .trailing))
-                            .cornerRadius(15)
-                            .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 5)
-                            .frame(maxWidth: .infinity, alignment: .center)
+            VStack(spacing: 32) {
+                VStack(alignment: .leading) {
+                    HStack {
+                        Text("Latest Expenses")
+                            .font(.title.bold())
+                            .foregroundColor(.primary)
+                        Spacer()
+                        NavigationLink(destination: ExpenseListView(groupId: group.id)) {
+                            HStack(spacing: 4) {
+                                Text("See All")
+                                Image(systemName: "chevron.right")
+                            }
+                            .font(.subheadline)
+                            .foregroundColor(.blue)
+                            
+                        }
                     }
-                    .sheet(isPresented: $showTripPlans) {
-                        TripPlanListView(group: group)
+                    
+                    if expenseViewModel.expenses.isEmpty {
+                        Text("No expenses added yet.")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    } else {
+                        ForEach(expenseViewModel.expenses.prefix(3), id: \.id) { expense in
+                            NavigationLink(destination: ExpenseView(expense: expense, expenseViewModel: expenseViewModel)) {
+                                ExpenseRowView(expense: expense)
+                            }
+                            
+                        }
                     }
-                    Button {
-                        showExpensesView = true
-                    } label: {
-                        Text("Expenses")
-                            .font(.title3)
-                            .bold()
-                            .padding(.vertical, 15)
-                            .padding(.horizontal, 20)
-                            .foregroundColor(.white)
-                            .background(LinearGradient(gradient: Gradient(colors: [Color.blue, Color.purple]), startPoint: .leading, endPoint: .trailing))
-                            .cornerRadius(15)
-                            .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 5)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                    }.sheet(isPresented: $showExpensesView) {
-                        ExpenseListView(groupId: group.id)
+                }
+                
+                VStack(alignment: .leading) {
+                    HStack {
+                        Text("Upcoming Trip Plans")
+                            .font(.title.bold())
+                            .foregroundColor(.primary)
+                        Spacer()
+                        NavigationLink(destination: TripPlanListView()) {
+                            HStack(spacing: 4) {
+                                Text("See All")
+                                Image(systemName: "chevron.right")
+                            }
+                            .font(.subheadline)
+                            .foregroundColor(.blue)
+                            
+                        }
+                    }
+                    
+                    if tripPlanViewModel.tripPlans.isEmpty {
+                        Text("No trips planned yet.")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    } else {
+                        ForEach(tripPlanViewModel.tripPlans.prefix(3), id: \.id) { trip in
+                            NavigationLink(destination: TripPlanDetailView(group: group, tripPlan: trip, tripViewModel: tripPlanViewModel)) {
+                                TripCardView(trip: trip)
+                            }
+                        }
                     }
                 }
             }
-            .padding(.top)
+            .padding(.horizontal)
+            
         }
+        .background(Color(hex: "#E2F1E5").ignoresSafeArea())
         .ignoresSafeArea(edges: .top)
         .onAppear {
             Task {
                 await groupViewModel.fetchUsersByGroupId(groupId: group.id, user: authViewModel.user)
+                await expenseViewModel.loadExpenses(forGroup: group.id, user: authViewModel.user)
+                await tripPlanViewModel.fetchTripPlansByGroupId(user: authViewModel.user, groupId: group.id)
             }
         }
         .navigationBarBackButtonHidden(true)
+
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button(action: {
+                    dismiss()
+                }) {
+                    HStack {
+                        Image(systemName: "chevron.left")
+                        Text("Back")
+                    }
+                    .padding(10)
+                    .foregroundColor(.white)
+                    .background(Color.black.opacity(0.5))
+                    .clipShape(Capsule())
+                }
+            }
+
+            ToolbarItem(placement: .navigationBarTrailing) {
+                NavigationLink(destination: GroupSettings(groupViewModel: groupViewModel, group: group)) {
+                    Image(systemName: "gearshape.fill")
+                        .foregroundColor(.white)
+                        .padding(10)
+                        .background(Color.black.opacity(0.5))
+                        .clipShape(Circle())
+                }
+            }
+        }
+
+
     }
 }
 
-
 #Preview {
     NavigationStack {
-        GroupView(groupViewModel: GroupViewModel(), group: GroupResponse(id: 66, groupName: "TestGroup", imageUrl: "http://localhost:3000/static/groupImages/Three Friends Walking in the City.jpeg"))
+        GroupView(groupViewModel: GroupViewModel(), group: GroupResponse(id: 87, groupName: "TestGroup", imageUrl: "http://localhost:3000/static/groupImages/Three Friends Walking in the City.jpeg"))
             .environmentObject(AuthenticationViewModel1(firebaseService: FirebaseAuthentication(), authService: AuthService()))
     }
 }

@@ -10,7 +10,10 @@ struct CityAttractionsScrollableView: View {
             ScrollView(.horizontal, showsIndicators: false){
                 HStack(spacing: 20){
                     ForEach(viewModel.attractions, id: \.id){ attraction in
-                        AttractionVerticalCardView(attraction: attraction)
+                        NavigationLink(destination: TouristicAttractionDetailView(attraction: attraction)) {
+                            AttractionVerticalCardView(attraction: attraction)
+                        }
+                        .buttonStyle(PlainButtonStyle())
                     }
                 }
             }

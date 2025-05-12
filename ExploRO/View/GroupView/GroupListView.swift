@@ -46,7 +46,7 @@ struct GroupListView: View {
                     if isSearching {
                         TextField("Search groups...", text: $viewModel.searchText)
                             .padding()
-                            .background(Color(.systemGray6))
+                            .background(Color(hex: "#ECECEC"))
                             .cornerRadius(12)
                             .padding(.horizontal)
                             .transition(.opacity.combined(with: .move(edge: .top)))
@@ -79,12 +79,12 @@ struct GroupListView: View {
 
                                         Text(group.groupName)
                                             .font(.headline)
-                                            .foregroundColor(.primary)
+                                            .foregroundColor(Color(hex: "#1E2D24"))
 
                                         Spacer()
                                     }
                                     .padding()
-                                    .background(Color.white)
+                                    .background(Color(hex: "#C0DFC8"))
                                     .cornerRadius(16)
                                     .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                                 }
@@ -94,7 +94,6 @@ struct GroupListView: View {
                     }
                 }
 
-                // Floating Create Group Button
                 Button(action: {
                     isCreateGroupPresented = true
                 }) {
@@ -112,7 +111,7 @@ struct GroupListView: View {
                 }
             }
             .navigationTitle("")
-            .background(Color(.systemGroupedBackground).ignoresSafeArea())
+            .background(Color(hex: "#E2F1E5").ignoresSafeArea())
             .task {
                 await viewModel.fetchGroupsByUserId(user: authViewModel.user)
             }

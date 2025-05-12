@@ -23,7 +23,7 @@ struct GroupsScrollableView: View {
                 HStack {
                     ForEach(viewModel.groups, id: \.id) { group in
                         NavigationLink{
-                            GroupView(groupViewModel: viewModel, group: group)
+                                GroupView(groupViewModel: viewModel, group: group)
                         }label:{
                             VStack {
                                 AsyncImage(url: URL(string: group.imageUrl ?? "")) { image in

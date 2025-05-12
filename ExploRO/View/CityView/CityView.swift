@@ -38,7 +38,7 @@ struct CityView: View {
             }
             .frame(height: 300)
             
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading) {
                 HStack {
                     Text(city.cityName)
                         .font(.largeTitle.bold())

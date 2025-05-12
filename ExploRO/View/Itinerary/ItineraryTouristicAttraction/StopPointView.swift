@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ItineraryTouristicAttractionView: View {
+struct StopPointView: View {
     let itinerary: ItineraryResponse
     let tripPlan: TripPlanResponse
     @StateObject private var stopPointViewModel = StopPointViewModel()
@@ -45,6 +45,7 @@ struct ItineraryTouristicAttractionView: View {
                         Image(systemName: "trash")
                     }
                     .padding(.trailing)
+                    .foregroundStyle(Color(red: 57/255, green: 133/255, blue: 72/255))
                 }
                 Button{
                     showAttractionList.toggle()
@@ -57,11 +58,10 @@ struct ItineraryTouristicAttractionView: View {
                     .font(.headline)
                     .opacity(0.7)
                 }.sheet(isPresented: $showAttractionList) {
-                    CityAttractionsView(stopPointViewModel: stopPointViewModel, cityId: tripPlan.cityId, itineraryId: itinerary.id, tripPlanId: tripPlan.id)
+                    AddStopPointsView(stopPointViewModel: stopPointViewModel, cityId: tripPlan.cityId, itineraryId: itinerary.id, tripPlanId: tripPlan.id)
                 }
                 if stopPointViewModel.stopPoints.isEmpty{
                     Button{
-                        //add stopPoints
                         showAttractionList.toggle()
                     }label:{
                         RoundedRectangle(cornerRadius: 8)
@@ -80,11 +80,11 @@ struct ItineraryTouristicAttractionView: View {
                     }
                     .padding(.bottom, 40)
                     .sheet(isPresented: $showAttractionList) {
-                        CityAttractionsView(stopPointViewModel: stopPointViewModel, cityId: tripPlan.cityId, itineraryId: itinerary.id, tripPlanId: tripPlan.id)
+                        AddStopPointsView(stopPointViewModel: stopPointViewModel, cityId: tripPlan.cityId, itineraryId: itinerary.id, tripPlanId: tripPlan.id)
                     }
                 }else{
                     ForEach(stopPointViewModel.stopPoints, id: \.id){ stopPoint in
-                        TouristicAttractionView(stopPoint: stopPoint,itineraryId: itinerary.id, stopPointViewModel: stopPointViewModel, stopPointsList: $stopPointViewModel.stopPoints)
+                        TouristicAttractionShortView(stopPoint: stopPoint, itineraryId: itinerary.id, stopPointViewModel: stopPointViewModel, stopPointsList: $stopPointViewModel.stopPoints)
                     }
                 }
             }
@@ -101,10 +101,11 @@ struct ItineraryTouristicAttractionView: View {
 #Preview {
     @Previewable @State var emptyItineraryList: [ItineraryResponse] = []
 
-    ItineraryTouristicAttractionView(
-        itinerary: ItineraryResponse(id: 1, dayNr: 1),
-        tripPlan: TripPlanResponse(id: 1, tripName: "Test trip", startDate: Date(), endDate: Date(), groupName: "TestGroup", cityName: "Bucharest", cityId: 57),
-        itineraryList: $emptyItineraryList // Pass a binding to the state variable
+    StopPointView(
+        itinerary: ItineraryResponse(id: 97, dayNr: 1),
+        tripPlan: TripPlanResponse(id: 49, tripName: "Test trip", startDate: Date(), endDate: Date(), groupName: "TestGroup", cityName: "Bucharest", cityId: 86),
+        itineraryList: $emptyItineraryList
     )
+    .environmentObject(AuthenticationViewModel1(firebaseService: FirebaseAuthentication(), authService: AuthService()))
 }
 

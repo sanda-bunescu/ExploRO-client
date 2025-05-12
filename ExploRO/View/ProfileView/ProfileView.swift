@@ -67,7 +67,7 @@ struct ProfileView: View {
                 
                 Spacer()
             }
-            .background(Color(UIColor.systemGroupedBackground))
+            .background(Color(hex: "#E2F1E5").ignoresSafeArea())
             .edgesIgnoringSafeArea(.top)
             .alert("Log out?", isPresented: $showLogoutAlert) {
                 Button("Log out", role: .destructive) {
