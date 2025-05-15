@@ -111,7 +111,7 @@ struct CityView: View {
 
 #Preview {
     let sampleCity = CityResponse(
-        id: 57,
+        id: 100,
         cityName: "Bucuresti",
         cityDescription: "Bucuresti, the capital of Romania",
         imageUrl: "/static/images/Bucuresti.png"

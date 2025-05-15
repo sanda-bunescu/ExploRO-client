@@ -33,9 +33,9 @@ struct AttractionVerticalCardView: View {
             AsyncImage(url: URL(string: attraction.imageUrl ?? "")) { image in
                 image
                     .resizable()
-                    .scaledToFit()
-                    .frame(width: 120, height: 130)
-                    .clipShape(RoundedRectangle(cornerRadius: 25))
+                    .scaledToFill()
+                    .frame(width: 140, height: 130)
+                    .clipShape(RoundedRectangle(cornerRadius: 15))
             } placeholder: {
                 Image(systemName: "building.2")
                     .resizable()
@@ -46,10 +46,10 @@ struct AttractionVerticalCardView: View {
             Text(attraction.attractionName)
                 .font(.headline)
         }
-        .frame(width: 150, height: 150)
+        .frame(width: 145, height: 150)
     }
 }
 
 #Preview {
-    CityAttractionsScrollableView(cityId: 57)
+    CityAttractionsScrollableView(cityId: 103)
 }
