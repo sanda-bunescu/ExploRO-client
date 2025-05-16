@@ -59,6 +59,11 @@ struct HomeView: View {
                         TripsView()
                         CityOverviewView()
                         GroupsScrollableView()
+                        NavigationLink{
+                            LandmarkRecognitionView()
+                        }label:{
+                            Text("Location detection")
+                        }
                     }
                     .padding()
             }
