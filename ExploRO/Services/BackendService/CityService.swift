@@ -25,13 +25,14 @@ class CityService: CityServiceProtocol{
         }
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        
+        print(url)
         
         request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
             
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                print("Not connected")
                 throw CityServiceError.requestFailed
             }
             let decoder = JSONDecoder()

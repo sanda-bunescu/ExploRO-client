@@ -14,7 +14,7 @@ struct AppConfig {
         case .simulator:
             return "http://localhost:3000"
         case .device:
-            return "http://192.168.1.128:3000"
+            return "http://Sandas-MacBook-Pro.local:3000"
         }
     }
 
@@ -23,7 +23,7 @@ struct AppConfig {
         case .simulator:
             return "http://localhost:8000"
         case .device:
-            return "http://192.168.1.128:8000"
+            return "http://Sandas-MacBook-Pro.local:8000"
         }
     }
 }
