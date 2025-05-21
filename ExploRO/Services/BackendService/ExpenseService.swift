@@ -31,7 +31,7 @@ protocol ExpenseServiceProtocol {
 }
 
 class ExpenseService: ExpenseServiceProtocol {
-    private let baseURL = "http://localhost:3000"
+    private let baseURL = AppConfig.baseURL
     
     func fetchExpenses(forGroup groupId: Int, idToken: String) async throws -> [ExpenseResponse] {
         guard let url = URL(string: "\(baseURL)/get-expenses-by-groupid?groupId=\(groupId)") else {
@@ -53,13 +53,9 @@ class ExpenseService: ExpenseServiceProtocol {
             let decoder = JSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase
             decoder.dateDecodingStrategy = .iso8601
-            let decoded = try decoder.decode([String: [ExpenseResponse]].self, from: data)
+            let expensesWrapper = try decoder.decode(ExpenseWrapper.self, from: data)
             
-            guard let expenses = decoded["expenses"], !expenses.isEmpty else {
-                throw ExpenseError.keyNotFound
-            }
-            
-            return expenses
+            return expensesWrapper.expenses ?? []
         } catch {
             print("Error fetching expenses:", error)
             throw ExpenseError.requestFailed(message: "Unknown error occurred")

@@ -15,7 +15,7 @@ protocol ItineraryServiceProtocol {
 }
 
 class ItineraryService: ItineraryServiceProtocol {
-    let baseURL = "http://localhost:3000"
+    let baseURL = AppConfig.baseURL
     func getAllItinerariesByTripPlanId(tripPlanId: Int, idToken: String) async throws -> [ItineraryResponse] {
         guard let url = URL(string: "\(baseURL)/get-all-itineraries-by-trip-plan-id?tripPlanId=\(tripPlanId)") else{
             throw ItineraryError.invalidURL

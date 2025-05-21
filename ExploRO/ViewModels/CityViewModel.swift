@@ -23,7 +23,7 @@ class CityViewModel: ObservableObject {
             fetchedCities = fetchedCities.map { city in
                 var modifiedCity = city
                 if let imageUrl = city.imageUrl, !imageUrl.isEmpty {
-                    modifiedCity.imageUrl = "http://localhost:3000\(imageUrl)"
+                    modifiedCity.imageUrl = "\(AppConfig.baseURL)\(imageUrl)"
                 }
                 return modifiedCity
             }
@@ -50,7 +50,7 @@ class CityViewModel: ObservableObject {
             unsaved = unsaved.map { city in
                 var modifiedCity = city
                 if let imageUrl = city.imageUrl, !imageUrl.isEmpty {
-                    modifiedCity.imageUrl = "http://localhost:3000\(imageUrl)"
+                    modifiedCity.imageUrl = "\(AppConfig.baseURL)\(imageUrl)"
                 }
                 return modifiedCity
             }

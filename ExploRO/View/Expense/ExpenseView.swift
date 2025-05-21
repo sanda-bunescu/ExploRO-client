@@ -4,6 +4,7 @@ struct ExpenseView: View {
     let expense: ExpenseResponse
     @ObservedObject var expenseViewModel: ExpenseViewModel
     @EnvironmentObject var authViewModel: AuthenticationViewModel1
+    @Environment(\.dismiss) var dismiss
     @State private var isEditing = false
     @State private var showDeleteConfirmation = false
 
@@ -103,6 +104,7 @@ struct ExpenseView: View {
                 primaryButton: .destructive(Text("Delete")) {
                     Task{
                         await expenseViewModel.deleteExpense(expense: expense, user: authViewModel.user)
+                        dismiss()
                     }
                 },
                 secondaryButton: .cancel()

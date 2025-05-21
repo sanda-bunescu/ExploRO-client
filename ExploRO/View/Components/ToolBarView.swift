@@ -22,6 +22,7 @@ struct ToolbarContainer<Content: View>: View {
             content()
             ToolBarView(selectedTab: $selectedTab)
         }
+        .background(Color(hex: "#E2F1E5").ignoresSafeArea())
         .edgesIgnoringSafeArea(.bottom)
     }
 }
@@ -36,7 +37,6 @@ struct ToolBarView: View {
             Rectangle()
                 .clipShape(RoundedRectangle(cornerRadius: 25.0))
                 .foregroundStyle(Color(red: 57/255, green: 133/255, blue: 72/255))
-
             HStack {
                 ToolbarItemView(systemImage: "house", label: "Home") {
                     selectedTab = .home
@@ -59,6 +59,7 @@ struct ToolBarView: View {
         }
         .frame(width: screenWidth, height: 90)
         .ignoresSafeArea()
+        
     }
 }
 

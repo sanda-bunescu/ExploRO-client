@@ -29,7 +29,7 @@ protocol DebtServiceProtocol {
 }
 
 class DebtService: DebtServiceProtocol {
-    private let baseURL = "http://localhost:3000"
+    private let baseURL = AppConfig.baseURL
     func fetchDebts(groupId: Int, idToken: String) async throws -> [DebtDetailResponse] {
         guard let url = URL(string: "\(baseURL)/get-user-debts?groupId=\(groupId)") else {
             throw DebtError.invalidURL

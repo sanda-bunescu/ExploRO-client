@@ -20,8 +20,16 @@ class StopPointViewModel: ObservableObject{
         
         do {
             let idToken = try await user.getIDToken()
-            let fetchedStopPoints = try await stopPointService.getAllTouristicAttractionsByItineraryId(itineraryId: itineraryId, idToken: idToken)
+            var fetchedStopPoints = try await stopPointService.getAllTouristicAttractionsByItineraryId(itineraryId: itineraryId, idToken: idToken)
+            fetchedStopPoints = fetchedStopPoints.map { stopPoint in
+                var modifiedStopPoint = stopPoint
+                if let imageUrl = stopPoint.touristicAttraction.imageUrl, !imageUrl.isEmpty, !imageUrl.starts(with: "http") {
+                    modifiedStopPoint.touristicAttraction.imageUrl = "\(AppConfig.baseURL)\(imageUrl)"
+                }
+                return modifiedStopPoint
+            }
             self.stopPoints = fetchedStopPoints
+
         } catch {
             self.errorMessage = "Failed to fetch stop points: \(error.localizedDescription)"
         }

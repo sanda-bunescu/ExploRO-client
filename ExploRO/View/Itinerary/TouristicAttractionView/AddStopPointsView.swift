@@ -47,7 +47,7 @@ struct AddStopPointsView: View {
                         .foregroundColor(.white)
                     Spacer()
                 }
-                .background(selectedAttractions.isEmpty ? Color.gray : Color.blue)
+                .background(selectedAttractions.isEmpty ? Color.gray : Color(red: 57/255, green: 133/255, blue: 72/255))
                 .cornerRadius(10)
                 .padding()
             }

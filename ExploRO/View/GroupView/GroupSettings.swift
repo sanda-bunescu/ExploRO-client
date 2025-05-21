@@ -3,11 +3,12 @@ import SwiftUI
 import SwiftUI
 
 struct GroupSettings: View {
+    var onGroupLeftOrDeleted: (() -> Void)?
     @EnvironmentObject var authViewModel: AuthenticationViewModel1
     @ObservedObject var groupViewModel: GroupViewModel
     @Environment(\.dismiss) private var dismiss
     let group: GroupResponse
-
+    
     @State private var showAddUserView = false
     @State private var showLeaveGroupAlert = false
     @State private var showDeleteGroupAlert = false
@@ -15,99 +16,100 @@ struct GroupSettings: View {
     @State private var selectedMember: GroupUserResponse?
 
     var body: some View {
-        NavigationStack {
-            List {
-                Section(header: Text("Group Members").font(.headline)) {
+        List {
+            Section(header: Text("Group Members").font(.headline)) {
+                Button {
+                    showAddUserView = true
+                } label: {
+                    Label("Add Group Member", systemImage: "plus.circle.fill")
+                        .font(.body)
+                        .foregroundColor(.blue)
+                }
+                .sheet(isPresented: $showAddUserView) {
+                    AddUserGroupView(groupViewModel: groupViewModel, groupId: group.id)
+                }
+                
+                ForEach(groupViewModel.groupMembers, id: \.userId) { member in
                     Button {
-                        showAddUserView = true
+                        selectedMember = member
+                        showSheet = true
                     } label: {
-                        Label("Add Group Member", systemImage: "plus.circle.fill")
-                            .font(.body)
-                            .foregroundColor(.blue)
-                    }
-                    .sheet(isPresented: $showAddUserView) {
-                        AddUserGroupView(groupViewModel: groupViewModel, groupId: group.id)
-                    }
-
-                    ForEach(groupViewModel.groupMembers, id: \.userId) { member in
-                        Button {
-                            selectedMember = member
-                            showSheet = true
-                        } label: {
-                            HStack {
-                                Image(systemName: "person.crop.circle.fill")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 40, height: 40)
+                        HStack {
+                            Image(systemName: "person.crop.circle.fill")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 40, height: 40)
+                                .foregroundColor(.black)
+                            
+                            VStack(alignment: .leading) {
+                                Text(member.userName.isEmpty ? "Unknown" : member.userName)
+                                    .font(.body)
+                                    .bold()
                                     .foregroundColor(.black)
-                                
-                                VStack(alignment: .leading) {
-                                    Text(member.userName.isEmpty ? "Unknown" : member.userName)
-                                        .font(.body)
-                                        .bold()
-                                        .foregroundColor(.black)
-                                    Text(member.userEmail)
-                                        .font(.subheadline)
-                                        .foregroundColor(.gray)
-                                }
-                            }
-                            .padding(.vertical, 5)
-                        }
-                    }
-                }
-
-                Section {
-                    Button(role: .destructive) {
-                        showLeaveGroupAlert = true
-                    } label: {
-                        Label("Leave Group", systemImage: "arrow.left.circle")
-                            .foregroundStyle(.red)
-                    }
-                    .alert("Leave Group", isPresented: $showLeaveGroupAlert) {
-                        Button("Cancel", role: .cancel) {}
-                        Button("Leave", role: .destructive) {
-                            Task {
-                                await groupViewModel.leaveGroup(groupId: group.id, user: authViewModel.user)
-                                dismiss()
+                                Text(member.userEmail)
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
                             }
                         }
-                    } message: {
-                        Text("Are you sure you want to leave this group?")
-                    }
-
-                    Button(role: .destructive) {
-                        showDeleteGroupAlert = true
-                    } label: {
-                        Label("Delete Group", systemImage: "trash")
-                            .foregroundStyle(.red)
-                    }
-                    .alert("Delete Group", isPresented: $showDeleteGroupAlert) {
-                        Button("Cancel", role: .cancel) {}
-                        Button("Delete", role: .destructive) {
-                            Task {
-                                await groupViewModel.deleteGroup(groupId: group.id, user: authViewModel.user)
-                                dismiss()
-                            }
-                        }
-                    } message: {
-                        Text("Are you sure you want to delete this group?")
+                        .padding(.vertical, 5)
                     }
                 }
             }
-            .navigationTitle(group.groupName)
-            .navigationBarTitleDisplayMode(.inline)
-            .sheet(isPresented: $showSheet) {
-                if let selectedMember = selectedMember {
-                    BottomSheet(member: selectedMember, groupViewModel: groupViewModel, group: group)
-                        .presentationDetents([.fraction(0.1)])
+            
+            Section {
+                Button(role: .destructive) {
+                    showLeaveGroupAlert = true
+                } label: {
+                    Label("Leave Group", systemImage: "arrow.left.circle")
+                        .foregroundStyle(.red)
                 }
-                Text(selectedMember?.userName ?? "No member selected")
+                .alert("Leave Group", isPresented: $showLeaveGroupAlert) {
+                    Button("Cancel", role: .cancel) {}
+                    Button("Leave", role: .destructive) {
+                        Task {
+                            await groupViewModel.leaveGroup(groupId: group.id, user: authViewModel.user)
+                            dismiss()
+                            onGroupLeftOrDeleted?()
+                        }
+                    }
+                } message: {
+                    Text("Are you sure you want to leave this group?")
+                }
+                
+                Button(role: .destructive) {
+                    showDeleteGroupAlert = true
+                } label: {
+                    Label("Delete Group", systemImage: "trash")
+                        .foregroundStyle(.red)
+                }
+                .alert("Delete Group", isPresented: $showDeleteGroupAlert) {
+                    Button("Cancel", role: .cancel) {}
+                    Button("Delete", role: .destructive) {
+                        Task {
+                            await groupViewModel.deleteGroup(groupId: group.id, user: authViewModel.user)
+                            dismiss()
+                            onGroupLeftOrDeleted?()
+                        }
+                    }
+                } message: {
+                    Text("Are you sure you want to delete this group?")
+                }
             }
-            .onChange(of: selectedMember?.userId, { oldValue, newValue in
-                showSheet = newValue != nil
-            })
         }
+        .navigationTitle(group.groupName)
+        .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showSheet) {
+            if let selectedMember = selectedMember {
+                BottomSheet(member: selectedMember, groupViewModel: groupViewModel, group: group)
+                    .presentationDetents([.fraction(0.1)])
+            }
+            Text(selectedMember?.userName ?? "No member selected")
+        }
+        .onChange(of: selectedMember?.userId, { oldValue, newValue in
+            showSheet = newValue != nil
+        })
     }
+    
 }
 
 struct BottomSheet: View {

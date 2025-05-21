@@ -1,4 +1,8 @@
 import Foundation
+struct ExpenseWrapper: Decodable {
+    let expenses: [ExpenseResponse]?
+}
+
 struct ExpenseResponse: Codable, Identifiable{
     let id: Int
     let name: String

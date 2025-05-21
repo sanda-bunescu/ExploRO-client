@@ -53,17 +53,14 @@ struct HomeView: View {
                                 }
                             }
                             .padding()
+                            
                         }
 
                     VStack {
+                        LandmarkRecognitionButtonView()
                         TripsView()
                         CityOverviewView()
                         GroupsScrollableView()
-                        NavigationLink{
-                            LandmarkRecognitionView()
-                        }label:{
-                            Text("Location detection")
-                        }
                     }
                     .padding()
             }

@@ -13,7 +13,7 @@ protocol LandmarkPredictionServiceProtocol {
 }
 
 class LandmarkPredictionService: LandmarkPredictionServiceProtocol {
-    let baseURL = "http://127.0.0.1:8000"
+    let baseURL = AppConfig.landmarkBaseURL
 
     func uploadImage(_ image: UIImage) async throws -> LandmarkPredictionResponse {
         guard let url = URL(string: "\(baseURL)/predict"),

@@ -12,9 +12,28 @@ struct TripPlanListView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(hex: "#E2F1E5").ignoresSafeArea() // Always fill background
+                Color(hex: "#E2F1E5").ignoresSafeArea()
 
                 VStack {
+                    HStack {
+                        Text("Trip Plans")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+
+                        Spacer()
+
+                        Button(action: {
+                            showCreateTripView = true
+                        }) {
+                            Image(systemName: "plus")
+                                .font(.title2)
+                                .foregroundStyle(Color(red: 57/255, green: 133/255, blue: 72/255))
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.top)
+
                     if tripPlanViewModel.tripPlans.isEmpty {
                         Spacer()
                         VStack(spacing: 16) {
@@ -26,12 +45,16 @@ struct TripPlanListView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
 
-                            Button(action: {
+                            Button{
                                 showCreateTripView = true
-                            }) {
-                                Label("Create Your First Trip", systemImage: "plus")
+                            }label: {
+                                HStack{
+                                    Image(systemName: "plus")
+                                    Text("Create Your First Trip")
+                                }
                             }
                             .buttonStyle(.borderedProminent)
+                            .tint(Color(red: 57/255, green: 133/255, blue: 72/255))
                         }
                         .padding()
                         Spacer()
@@ -47,16 +70,6 @@ struct TripPlanListView: View {
                             }
                             .padding(.horizontal)
                         }
-                    }
-                }
-            }
-            .navigationTitle("Trip Plans")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        showCreateTripView = true
-                    }) {
-                        Image(systemName: "plus")
                     }
                 }
             }

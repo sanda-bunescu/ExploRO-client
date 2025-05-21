@@ -17,7 +17,7 @@ protocol CityServiceProtocol {
 
 
 class CityService: CityServiceProtocol{
-    private let baseURL = "http://localhost:3000"
+    private let baseURL = AppConfig.baseURL
     
     func getUserCities(idToken: String) async throws -> [CityResponse]{
         guard let url = URL(string: "\(baseURL)/get-user-cities") else {

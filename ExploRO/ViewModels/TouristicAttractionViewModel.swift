@@ -17,7 +17,7 @@ class TouristicAttractionViewModel: ObservableObject {
             fetchedAttractions = fetchedAttractions.map { attraction in
                 var modifiedAttraction = attraction
                 if let imageUrl = attraction.imageUrl, !imageUrl.isEmpty {
-                    modifiedAttraction.imageUrl = "http://localhost:3000\(imageUrl)"
+                    modifiedAttraction.imageUrl = "\(AppConfig.baseURL)\(imageUrl)"
                 }
                 return modifiedAttraction
             }
@@ -38,7 +38,7 @@ class TouristicAttractionViewModel: ObservableObject {
             fetchedAttractions = fetchedAttractions.map { attraction in
                 var modifiedAttraction = attraction
                 if let imageUrl = attraction.imageUrl, !imageUrl.isEmpty {
-                    modifiedAttraction.imageUrl = "http://localhost:3000\(imageUrl)"
+                    modifiedAttraction.imageUrl = "\(AppConfig.baseURL)\(imageUrl)"
                 }
                 return modifiedAttraction
             }

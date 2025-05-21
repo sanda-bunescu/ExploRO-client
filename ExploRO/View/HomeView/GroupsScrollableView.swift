@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct GroupsScrollableView: View {
-    
     @EnvironmentObject var authViewModel: AuthenticationViewModel1
     @StateObject private var viewModel = GroupViewModel()
     var body: some View {
@@ -16,7 +15,7 @@ struct GroupsScrollableView: View {
                 NavigationLink(destination: CreateGroupView(viewModel: viewModel)) {
                     Image(systemName: "plus.circle.fill")
                         .font(.title)
-                        .foregroundColor(.blue)
+                        .foregroundColor(Color(red: 57/255, green: 133/255, blue: 72/255))
                 }
             }
             ScrollView (.horizontal, showsIndicators: false){

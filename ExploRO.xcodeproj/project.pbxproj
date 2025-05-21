@@ -25,6 +25,7 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A74046A02DBFBC8F00E9FBC2 /* Common */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Common; sourceTree = "<group>"; };
+		A785AC102DD87852002BACB3 /* AR */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = AR; sourceTree = "<group>"; };
 		A79D5B402D637946004CCDD0 /* Core */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Core; sourceTree = "<group>"; };
 		A79D5B412D63797A004CCDD0 /* Models */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Models; sourceTree = "<group>"; };
 		A79D5B422D6379A1004CCDD0 /* Resources */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Resources; sourceTree = "<group>"; };
@@ -79,6 +80,7 @@
 		A7F7033D2C9038CC001F5254 /* ExploRO */ = {
 			isa = PBXGroup;
 			children = (
+				A785AC102DD87852002BACB3 /* AR */,
 				A74046A02DBFBC8F00E9FBC2 /* Common */,
 				A7B949902C9418AC0083C141 /* ExploRO.entitlements */,
 				A76F61782C92D0AD000F2F7C /* Info.plist */,
@@ -112,6 +114,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				A74046A02DBFBC8F00E9FBC2 /* Common */,
+				A785AC102DD87852002BACB3 /* AR */,
 				A79D5B402D637946004CCDD0 /* Core */,
 				A79D5B412D63797A004CCDD0 /* Models */,
 				A79D5B422D6379A1004CCDD0 /* Resources */,
@@ -326,7 +329,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ExploRO/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to your camera to take photos of landmarks.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Your app needs access to your location";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need access to your photo library to select images of landmarks.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -358,7 +363,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ExploRO/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to your camera to take photos of landmarks.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Your app needs access to your location";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need access to your photo library to select images of landmarks.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

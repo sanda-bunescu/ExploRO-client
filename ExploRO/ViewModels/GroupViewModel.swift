@@ -34,7 +34,7 @@ class GroupViewModel: ObservableObject {
             fetchedGroups = fetchedGroups.map { group in
                 var modifiedGroup = group
                 if let imageUrl = group.imageUrl, !imageUrl.isEmpty {
-                    modifiedGroup.imageUrl = "http://localhost:3000\(imageUrl)"
+                    modifiedGroup.imageUrl = "\(AppConfig.baseURL)\(imageUrl)"
                 }
                 return modifiedGroup
             }

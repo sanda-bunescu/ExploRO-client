@@ -42,14 +42,20 @@ class AuthenticationViewModel1: ObservableObject {
         do {
             let firUser = try await firebaseService.loginWithEmailAndPassword(with: email, password: password)
             self.user = firUser
-            if let idToken = try? await firUser.getIDToken() {
-                _ = try await backendService.sendIdTokenToBackend(idToken: idToken, for: .loginUser)
+            do {
+                if let idToken = try? await firUser.getIDToken() {
+                    _ = try await backendService.sendIdTokenToBackend(idToken: idToken, for: .loginUser)
+                }
+                errorMessage = ""
+                authenticationState = .authenticated
+            } catch {
+                errorMessage = "Failed to connect to server. Please try again later."
+                authenticationState = .unauthenticated
+                return
             }
-            errorMessage = ""
-            authenticationState = .authenticated
-        }  catch{
+        }catch let error as NSError {
             authenticationState = .unauthenticated
-            errorMessage = "Wrong email or password"
+            errorMessage = mapFirebaseAuthError(error)
         }
     }
     
@@ -251,6 +257,8 @@ class AuthenticationViewModel1: ObservableObject {
             return "Network error. Please check your connection and try again."
         case .tooManyRequests:
             return "Too many attempts. Please try again later."
+        case .wrongPassword, .userNotFound, .invalidCredential:
+                return "Wrong email or password."
         default:
             return error.localizedDescription
         }

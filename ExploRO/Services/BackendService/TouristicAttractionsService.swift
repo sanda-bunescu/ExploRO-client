@@ -13,7 +13,7 @@ protocol TouristicAttractionServiceProtocol {
 }
 
 class TouristicAttractionService: TouristicAttractionServiceProtocol {
-    let baseURL = "http://localhost:3000"
+    let baseURL = AppConfig.baseURL
     
     func fetchTouristicAttractionsNotInTripPlan(tripPlanId: Int, cityId: Int, idToken: String) async throws -> [TouristicAttractionResponse]{
         guard let url = URL(string: "\(baseURL)/attractions/not-in-itinerary?cityId=\(cityId)&tripPlanId=\(tripPlanId)") else {

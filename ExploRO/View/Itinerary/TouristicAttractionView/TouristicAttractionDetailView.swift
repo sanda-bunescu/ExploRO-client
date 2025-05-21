@@ -7,7 +7,6 @@ struct TouristicAttractionDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 
-                // Image
                 AsyncImage(url: URL(string: attraction.imageUrl ?? "")) { image in
                     image
                         .resizable()
@@ -26,7 +25,6 @@ struct TouristicAttractionDetailView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 20))
                 .shadow(radius: 5)
 
-                // Name & Category
                 VStack(alignment: .leading, spacing: 4) {
                     Text(attraction.attractionName)
                         .font(.largeTitle)
@@ -39,7 +37,6 @@ struct TouristicAttractionDetailView: View {
 
                 Divider()
 
-                // Open Hours & Fee
                 HStack {
                     Label(attraction.openHours, systemImage: "clock")
                     Spacer()
@@ -50,7 +47,6 @@ struct TouristicAttractionDetailView: View {
 
                 Divider()
 
-                // Description
                 Text("About")
                     .font(.title2)
                     .bold()
@@ -59,7 +55,6 @@ struct TouristicAttractionDetailView: View {
                     .font(.body)
                     .fixedSize(horizontal: false, vertical: true)
 
-                // More Info Link
                 if let url = URL(string: attraction.link), !attraction.link.isEmpty {
                     Link(destination: url) {
                         HStack {

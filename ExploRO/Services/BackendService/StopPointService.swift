@@ -15,7 +15,7 @@ protocol StopPointServiceProtocol {
 }
 
 class StopPointService: StopPointServiceProtocol {
-    let baseURL = "http://localhost:3000"
+    let baseURL = AppConfig.baseURL
     func getAllTouristicAttractionsByItineraryId(itineraryId: Int, idToken: String) async throws -> [StopPointResponse] {
         guard let url = URL(string: "\(baseURL)/get-all-attractions-by-itinerary-id?itineraryId=\(itineraryId)") else{
             throw StopPointError.invalidURL

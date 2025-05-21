@@ -17,7 +17,7 @@ struct CityOverviewView: View {
                 NavigationLink(destination: AddCityView(userCityViewModel: userCityViewModel)) {
                     Image(systemName: "plus.circle.fill")
                         .font(.title)
-                        .foregroundColor(.blue)
+                        .foregroundColor(Color(red: 57/255, green: 133/255, blue: 72/255))
                 }
             }
             .padding()

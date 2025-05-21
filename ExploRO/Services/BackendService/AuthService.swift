@@ -13,14 +13,15 @@ protocol AuthServiceProtocol {
 class AuthService: AuthServiceProtocol {
     func sendIdTokenToBackend(idToken: String, for action: BackendAction) async throws -> UserResponse {
         print(idToken)
+        let baseURL = AppConfig.baseURL
         var urlString: String
         switch action {
         case .createUser:
-            urlString = "http://localhost:3000/create-user"
+            urlString = "\(baseURL)/create-user"
         case .loginUser:
-            urlString = "http://localhost:3000/login-user"
+            urlString = "\(baseURL)/login-user"
         case .deleteUser:
-            urlString = "http://localhost:3000/delete-user"
+            urlString = "\(baseURL)/delete-user"
         }
 
         guard let url = URL(string: urlString) else {

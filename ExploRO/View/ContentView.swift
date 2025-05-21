@@ -28,6 +28,9 @@ struct ContentView: View {
                     .padding()
             case .unauthenticated:
                 AuthView(viewModel: AuthViewModel())
+                    .onAppear {
+                        selectedTab = .home
+                    }
             }
         }
     }

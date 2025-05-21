@@ -24,7 +24,7 @@ struct ItineraryTouristicAttractionsListView: View {
                         .font(.subheadline.bold())
                         .padding(.horizontal)
                         .padding(.vertical, 8)
-                        .background(Color.green)
+                        .background(Color(red: 57/255, green: 133/255, blue: 72/255))
                         .foregroundColor(.white)
                         .clipShape(Capsule())
                 }

@@ -145,7 +145,7 @@ struct CreateTripPlanView: View {
                     Text("Create Trip")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.blue)
+                        .background(Color(red: 57/255, green: 133/255, blue: 72/255))
                         .foregroundColor(.white)
                         .cornerRadius(12)
                 }
@@ -155,7 +155,6 @@ struct CreateTripPlanView: View {
             }
             .padding()
         }
-        .navigationTitle("New Trip")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             Task {

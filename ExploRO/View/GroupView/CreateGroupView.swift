@@ -45,7 +45,7 @@ struct CreateGroupView: View {
                             .font(.headline)
                             .foregroundColor(.white)
                             .padding()
-                            .background(Color.blue)
+                            .background(Color.green)
                             .cornerRadius(12)
                     }
                     

@@ -34,7 +34,7 @@ protocol GroupServiceProtocol {
 }
 
 class GroupService: GroupServiceProtocol {
-    private let baseURL = "http://localhost:3000"
+    private let baseURL = AppConfig.baseURL
     @Published var errorMessageToShow = ""
     func fetchGroupsByUserId(idToken: String) async throws -> [GroupResponse] {
         guard let url = URL(string: "\(baseURL)/get-groups-by-userid") else {

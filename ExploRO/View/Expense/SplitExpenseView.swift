@@ -76,7 +76,7 @@ struct SplitExpenseView: View {
                         }
                     }
                 }
-
+                
                 Button(action: saveExpense) {
                     Text("Save Expense")
                         .frame(maxWidth: .infinity)
@@ -114,6 +114,7 @@ struct SplitExpenseView: View {
                     selectedUserIds: selectedUserIds,
                     user: authViewModel.user
                 )
+                dismiss()
             }
         } else {
             Task {
@@ -122,9 +123,10 @@ struct SplitExpenseView: View {
                     manualAmounts: manualAmounts,
                     user: authViewModel.user
                 )
-                if success {
+                if success{
                     dismiss()
                 }
+                
             }
         }
     }

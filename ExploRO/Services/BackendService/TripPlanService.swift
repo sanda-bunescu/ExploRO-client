@@ -15,7 +15,7 @@ protocol TripPlanServiceProtocol {
 }
 
 class TripPlanService: TripPlanServiceProtocol {
-    private let baseURL = "http://localhost:3000"
+    private let baseURL = AppConfig.baseURL
     func fetchTripPlansByUserId(idToken: String) async throws -> [TripPlanResponse] {
         guard let url = URL(string: "\(baseURL)/get-trip-by-user") else {
             throw TripPlanError.invalidURL

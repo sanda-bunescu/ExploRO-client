@@ -9,7 +9,7 @@ struct GroupView: View {
     @State private var selectedMember: GroupUserResponse?
     let group: GroupResponse
     @Environment(\.dismiss) var dismiss
-    
+    @State private var showSettings = false
     @StateObject private var expenseViewModel = ExpenseViewModel()
     @StateObject private var tripPlanViewModel = TripPlanViewModel()
     
@@ -84,7 +84,7 @@ struct GroupView: View {
                                 Image(systemName: "chevron.right")
                             }
                             .font(.subheadline)
-                            .foregroundColor(.blue)
+                            .foregroundColor(Color(red: 57/255, green: 133/255, blue: 72/255))
                             
                         }
                     }
@@ -115,7 +115,7 @@ struct GroupView: View {
                                 Image(systemName: "chevron.right")
                             }
                             .font(.subheadline)
-                            .foregroundColor(.blue)
+                            .foregroundColor(Color(red: 57/255, green: 133/255, blue: 72/255))
                             
                         }
                     }
@@ -139,14 +139,14 @@ struct GroupView: View {
         .background(Color(hex: "#E2F1E5").ignoresSafeArea())
         .ignoresSafeArea(edges: .top)
         .onAppear {
-            Task {
+            Task{
                 await groupViewModel.fetchUsersByGroupId(groupId: group.id, user: authViewModel.user)
                 await expenseViewModel.loadExpenses(forGroup: group.id, user: authViewModel.user)
                 await tripPlanViewModel.fetchTripPlansByGroupId(user: authViewModel.user, groupId: group.id)
             }
         }
         .navigationBarBackButtonHidden(true)
-
+        
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
@@ -162,19 +162,42 @@ struct GroupView: View {
                     .clipShape(Capsule())
                 }
             }
-
+            
             ToolbarItem(placement: .navigationBarTrailing) {
-                NavigationLink(destination: GroupSettings(groupViewModel: groupViewModel, group: group)) {
+//                NavigationLink(destination: GroupSettings(
+//                    onGroupLeftOrDeleted: {
+//                        dismiss()
+//                    },
+//                    groupViewModel: groupViewModel,
+//                    group: group
+//                )) {
+//                    
+//                }
+                
+                Button{
+                    showSettings = true
+                }label:{
                     Image(systemName: "gearshape.fill")
                         .foregroundColor(.white)
                         .padding(10)
                         .background(Color.black.opacity(0.5))
                         .clipShape(Circle())
                 }
+                
             }
+            
+        }
+        .sheet(isPresented: $showSettings) {
+            GroupSettings(
+                onGroupLeftOrDeleted: {
+                    dismiss()
+                },
+                groupViewModel: groupViewModel,
+                group: group
+            )
         }
 
-
+        
     }
 }
 
