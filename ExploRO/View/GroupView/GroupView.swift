@@ -109,7 +109,7 @@ struct GroupView: View {
                             .font(.title.bold())
                             .foregroundColor(.primary)
                         Spacer()
-                        NavigationLink(destination: TripPlanListView()) {
+                        NavigationLink(destination: TripPlanListView(group: group)) {
                             HStack(spacing: 4) {
                                 Text("See All")
                                 Image(systemName: "chevron.right")

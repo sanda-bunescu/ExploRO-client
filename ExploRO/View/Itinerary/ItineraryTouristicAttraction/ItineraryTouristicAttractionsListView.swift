@@ -6,8 +6,8 @@ struct ItineraryTouristicAttractionsListView: View {
     @EnvironmentObject var authViewModel: AuthenticationViewModel1
     @State private var addedItineraryIndex: Int?
     @State private var showAlert = false
-    
     var body: some View {
+        
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Text("Itineraries")
@@ -16,7 +16,7 @@ struct ItineraryTouristicAttractionsListView: View {
                 Spacer()
                 Button {
                     Task {
-                        addedItineraryIndex = await itineraryViewModel.addItinerary(tripPlanId: tripPlan.id, user: authViewModel.user)
+                        addedItineraryIndex = await itineraryViewModel.addItinerary(tripPlanId: tripPlan.id,tripStartDate: tripPlan.startDate,tripEndDate: tripPlan.endDate, user: authViewModel.user)
                         showAlert = true
                     }
                 } label: {
@@ -60,6 +60,20 @@ struct ItineraryTouristicAttractionsListView: View {
                         }
                     }
                     .padding(.bottom)
+                    Button {
+                        Task {
+                            addedItineraryIndex = await itineraryViewModel.addItinerary(tripPlanId: tripPlan.id,tripStartDate: tripPlan.startDate,tripEndDate: tripPlan.endDate, user: authViewModel.user)
+                            showAlert = true
+                        }
+                    } label: {
+                        Label("Add", systemImage: "plus")
+                            .font(.subheadline.bold())
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
+                            .background(Color(red: 57/255, green: 133/255, blue: 72/255))
+                            .foregroundColor(.white)
+                            .clipShape(Capsule())
+                    }
                 }
             }
         }
@@ -70,6 +84,9 @@ struct ItineraryTouristicAttractionsListView: View {
         }
         .alert(isPresented: $showAlert) {
             Alert(title: Text("Itinerary Added"), message: Text("Your new itinerary has been added successfully."), dismissButton: .default(Text("OK")))
+        }
+        .alert(itineraryViewModel.errorMessage ?? "An unknown error has occurred. Please try again later.", isPresented: $itineraryViewModel.showErrorMessage) {
+            Button("Ok", role: .cancel) {}
         }
     }
 }

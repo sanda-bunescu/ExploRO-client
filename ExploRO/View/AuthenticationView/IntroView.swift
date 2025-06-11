@@ -7,7 +7,6 @@ struct IntroView: View {
     @State private var slideOut = false
     var body: some View {
         ZStack {
-            // Background image
             Image("Intro")
                 .resizable()
                 .scaledToFill()

@@ -8,7 +8,7 @@ struct TextFieldView: View {
         VStack{
             VStack(alignment: .leading){
                 Text(fieldName)
-                TextField("", text: $fieldData)
+                TextField(fieldName, text: $fieldData)
                     .padding()
                     .background(Color(red: 241/255.0, green: 241/255.0, blue: 241/255.0))
                     .clipShape(RoundedRectangle(cornerRadius: 15.0))

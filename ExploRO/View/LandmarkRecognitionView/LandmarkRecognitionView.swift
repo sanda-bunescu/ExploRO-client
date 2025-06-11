@@ -10,125 +10,126 @@ struct LandmarkRecognitionView: View {
     var body: some View {
         ZStack{
             Color(hex: "#E2F1E5").ignoresSafeArea()
-            
-            VStack(spacing: 20) {
-                Text("Upload or take a photo of a landmark. Our system will analyze it and give you detailed information including its label, address, and coordinates.")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-                
-                Group {
-                    if let image = image {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 300)
-                            .cornerRadius(10)
-                            .shadow(radius: 5)
-                    } else {
-                        VStack {
-                            Image(systemName: "photo.on.rectangle.angled")
+            ScrollView{
+                VStack(spacing: 20) {
+                    Text("Upload or take a photo of a landmark. Our system will analyze it and give you detailed information including its label, address, and coordinates.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                    
+                    Group {
+                        if let image = image {
+                            Image(uiImage: image)
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: 120, height: 120)
-                                .foregroundColor(.gray)
-                            Text("No image selected")
-                                .foregroundColor(.secondary)
+                                .frame(height: 300)
+                                .cornerRadius(10)
+                                .shadow(radius: 5)
+                        } else {
+                            VStack {
+                                Image(systemName: "photo.on.rectangle.angled")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 120, height: 120)
+                                    .foregroundColor(.gray)
+                                Text("No image selected")
+                                    .foregroundColor(.secondary)
+                            }
                         }
                     }
-                }
-                
-                VStack{
-                    HStack(spacing: 16) {
-                        Button(action: {
-                            sourceType = .camera
-                            showImagePicker = true
-                        }) {
-                            Label("Take Photo", systemImage: "camera")
+                    
+                    VStack{
+                        HStack(spacing: 16) {
+                            Button(action: {
+                                sourceType = .camera
+                                showImagePicker = true
+                            }) {
+                                Label("Take Photo", systemImage: "camera")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.blue)
+                            .disabled(!UIImagePickerController.isSourceTypeAvailable(.camera))
+                            
+                            Button(action: {
+                                sourceType = .photoLibrary
+                                showImagePicker = true
+                            }) {
+                                Label("Choose Photo", systemImage: "photo")
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                        NavigationLink("Real-Time Recognition Mode") {
+                            LandmarkARView()
                         }
                         .buttonStyle(.borderedProminent)
-                        .tint(.blue)
-                        .disabled(!UIImagePickerController.isSourceTypeAvailable(.camera))
-                        
+                        .tint(.purple)
+                    }
+                    
+                    if image != nil {
                         Button(action: {
-                            sourceType = .photoLibrary
-                            showImagePicker = true
+                            if let selectedImage = image {
+                                Task {
+                                    await viewModel.uploadImage(selectedImage)
+                                    
+                                    if viewModel.prediction != nil {
+                                        viewModel.errorMessage = nil
+                                    } else if viewModel.errorMessage != nil {
+                                        viewModel.prediction = nil
+                                    }
+                                }
+                            }
                         }) {
-                            Label("Choose Photo", systemImage: "photo")
+                            Label("Recognize Landmark", systemImage: "paperplane")
+                                .frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.bordered)
+                        .buttonStyle(.borderedProminent)
+                        .tint(.green)
+                        .padding(.top, 10)
                     }
-                    NavigationLink("Start AR Mode") {
-                        LandmarkARView()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.purple)
-                }
-                
-                if image != nil {
-                    Button(action: {
-                        if let selectedImage = image {
-                            Task {
-                                await viewModel.uploadImage(selectedImage)
-                                
-                                if viewModel.prediction != nil {
-                                    viewModel.errorMessage = nil
-                                } else if viewModel.errorMessage != nil {
-                                    viewModel.prediction = nil
+                    
+                    if let prediction = viewModel.prediction {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("🏷 Label: \(prediction.label)")
+                            Text("📍 Address: \(prediction.address ?? "N/A")").fixedSize(horizontal: false, vertical: true)
+                            if let lat = prediction.lat, let lon = prediction.lon {
+                                Button(action: {
+                                    let urlString = "http://maps.apple.com/?ll=\(lat),\(lon)&q=Landmark"
+                                    if let url = URL(string: urlString) {
+                                        UIApplication.shared.open(url)
+                                    }
+                                }) {
+                                    HStack {
+                                        Image(systemName: "map")
+                                        Text("Open in Maps")
+                                    }
+                                    .foregroundColor(.blue)
+                                    .padding(8)
+                                    .background(Color.blue.opacity(0.1))
+                                    .cornerRadius(8)
                                 }
                             }
+                            
                         }
-                    }) {
-                        Label("Send to Backend", systemImage: "paperplane")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.green)
-                    .padding(.top, 10)
-                }
-                
-                if let prediction = viewModel.prediction {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("🏷 Label: \(prediction.label)")
-                        Text("📍 Address: \(prediction.address ?? "N/A")").fixedSize(horizontal: false, vertical: true)
-                        if let lat = prediction.lat, let lon = prediction.lon {
-                            Button(action: {
-                                let urlString = "http://maps.apple.com/?ll=\(lat),\(lon)"
-                                if let url = URL(string: urlString) {
-                                    UIApplication.shared.open(url)
-                                }
-                            }) {
-                                HStack {
-                                    Image(systemName: "map")
-                                    Text("Open in Maps")
-                                }
-                                .foregroundColor(.blue)
-                                .padding(8)
-                                .background(Color.blue.opacity(0.1))
-                                .cornerRadius(8)
-                            }
-                        }
-
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.green.opacity(0.1))
-                    .cornerRadius(10)
-                }
-                
-                if let error = viewModel.errorMessage {
-                    Text("⚠️ \(error)")
-                        .foregroundColor(.red)
-                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding()
-                        .background(Color.red.opacity(0.1))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.green.opacity(0.1))
                         .cornerRadius(10)
+                    }
+                    
+                    if let error = viewModel.errorMessage {
+                        Text("⚠️ \(error)")
+                            .foregroundColor(.red)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding()
+                            .background(Color.red.opacity(0.1))
+                            .cornerRadius(10)
+                    }
+                    
+                    Spacer()
                 }
-                
-                Spacer()
+                .padding()
             }
-            .padding()
         }
         .navigationTitle("Landmark Recognition")
         .sheet(isPresented: $showImagePicker) {

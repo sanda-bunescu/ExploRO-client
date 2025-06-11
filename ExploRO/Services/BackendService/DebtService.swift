@@ -57,11 +57,9 @@ class DebtService: DebtServiceProtocol {
             }
             
             return debts
-        } catch let decodingError as DecodingError {
-            print("Decoding error:", decodingError)
+        } catch _ as DecodingError {
             throw DebtError.decodingError
         } catch {
-            print("Unexpected error:", error)
             throw DebtError.requestFailed(message: error.localizedDescription)
         }
     }
@@ -91,7 +89,6 @@ class DebtService: DebtServiceProtocol {
             }
             
         } catch {
-            print("Error deleting debt:", error)
             throw DebtError.requestFailed(message: error.localizedDescription)
         }
         

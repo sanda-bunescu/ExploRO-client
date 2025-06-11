@@ -95,7 +95,7 @@ struct AuthView: View {
     }
 }
 
-// Preview
+
 #Preview {
     AuthView(viewModel: AuthViewModel())
         .environmentObject(AuthenticationViewModel1(firebaseService: FirebaseAuthentication(), authService: AuthService()))

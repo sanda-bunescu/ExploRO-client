@@ -25,14 +25,12 @@ class CityService: CityServiceProtocol{
         }
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        print(url)
         
         request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
             
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                print("Not connected")
                 throw CityServiceError.requestFailed
             }
             let decoder = JSONDecoder()
@@ -86,13 +84,10 @@ class CityService: CityServiceProtocol{
         let addCityRequest = CityRequest(cityID: cityID)
         
         do {
-            // Encode the AddCityRequest object to JSON
             let encoder = JSONEncoder()
             encoder.keyEncodingStrategy = .convertToSnakeCase
             let jsonData = try encoder.encode(addCityRequest)
-            if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print("JSON Payload: \(jsonString)")
-            }
+            
 
             request.httpBody = jsonData
         } catch {
@@ -134,7 +129,6 @@ class CityService: CityServiceProtocol{
         let addCityRequest = CityRequest(cityID: cityID)
         
         do {
-            // Encode the AddCityRequest object to JSON
             let encoder = JSONEncoder()
             encoder.keyEncodingStrategy = .convertToSnakeCase
             let jsonData = try encoder.encode(addCityRequest)
@@ -143,7 +137,6 @@ class CityService: CityServiceProtocol{
         } catch {
             throw CityServiceError.encodingError
         }
-        
         do {
             let (_, response) = try await URLSession.shared.data(for: request)
             

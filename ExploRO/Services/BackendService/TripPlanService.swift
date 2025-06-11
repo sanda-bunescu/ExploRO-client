@@ -57,10 +57,6 @@ class TripPlanService: TripPlanServiceProtocol {
                 throw TripPlanError.requestFailed
             }
             
-            let rawJSON = String(data: data, encoding: .utf8)
-            print("Raw JSON Response:", rawJSON ?? "Invalid data")
-
-            
             let decoder = JSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase
             decoder.dateDecodingStrategy = .iso8601

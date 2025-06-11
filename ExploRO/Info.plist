@@ -9,7 +9,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.674971780492-a61lc61d22v3uvpmom2juvb45dhes515</string>
+				<string>com.googleusercontent.apps.327001175926-gkoi5nr1nb5pnncjmkj4ac8968fmt0ja</string>
 				<string>fb1912096225954529</string>
 			</array>
 		</dict>
@@ -17,15 +17,19 @@
 	<key>FacebookAppID</key>
 	<string>1912096225954529</string>
 	<key>FacebookClientToken</key>
-	<string>7289a922b7867e9edbbd7fe46768c2dd</string>
+	<string>$(FACEBOOK_CLIENT_TOKEN)</string>
 	<key>FacebookDisplayName</key>
 	<string>ExploRO</string>
 	<key>GIDClientID</key>
-	<string>com.googleusercontent.apps.674971780492-a61lc61d22v3uvpmom2juvb45dhes515</string>
+	<string>com.googleusercontent.apps.327001175926-gkoi5nr1nb5pnncjmkj4ac8968fmt0ja</string>
+	<key>GoogleClientID</key>
+	<string>327001175926-gkoi5nr1nb5pnncjmkj4ac8968fmt0ja.apps.googleusercontent.com</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>fbapi</string>
 		<string>fb-messenger-share-api</string>
 	</array>
+	<key>OPEN_WEATHER</key>
+	<string>$(OPEN_WEATHER)</string>
 </dict>
 </plist>

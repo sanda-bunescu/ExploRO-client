@@ -57,7 +57,6 @@ class ExpenseService: ExpenseServiceProtocol {
             
             return expensesWrapper.expenses ?? []
         } catch {
-            print("Error fetching expenses:", error)
             throw ExpenseError.requestFailed(message: "Unknown error occurred")
         }
     }
@@ -96,7 +95,6 @@ class ExpenseService: ExpenseServiceProtocol {
                 }
             }
         } catch {
-            print("Error saving expense:", error)
             throw ExpenseError.encodingError
         }
     }
@@ -128,13 +126,11 @@ class ExpenseService: ExpenseServiceProtocol {
                 }
             }
         } catch {
-            print("Error deleting expense:", error)
             throw ExpenseError.requestFailed(message: error.localizedDescription)
         }
     }
     
     func editExpense(expense: EditExpenseRequest, idToken: String) async throws{
-        print(expense.date)
         guard let url = URL(string: "\(baseURL)/edit-expense") else {
             throw ExpenseError.invalidURL
         }
@@ -168,7 +164,6 @@ class ExpenseService: ExpenseServiceProtocol {
             }
             
         } catch {
-            print("Error editing expense:", error)
             throw ExpenseError.encodingError
         }
     }

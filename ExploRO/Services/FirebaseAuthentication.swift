@@ -50,7 +50,6 @@ class FirebaseAuthentication: FirebaseAuthenticationProtocol {
     }
     func deleteUser() async throws{
         guard let user = Auth.auth().currentUser else{
-            print("No user is signed in.")
             return
         }
         do{
@@ -71,48 +70,44 @@ class FirebaseAuthentication: FirebaseAuthenticationProtocol {
             throw FirebaseErrorCode.reauthenticationFailed
         }
     }
-    func loginWithGoogle() async throws -> User{
-        guard let clientID = FirebaseApp.app()?.options.clientID else { throw FirebaseErrorCode.invalidCredentials}
-        
-        // Create Google Sign In configuration object.
+    func loginWithGoogle() async throws -> User {
+        guard let clientID = Bundle.main.object(forInfoDictionaryKey: "GoogleClientID") as? String else {
+            fatalError("GoogleClientID not found in Info.plist")
+        }
+
         let config = GIDConfiguration(clientID: clientID)
         GIDSignIn.sharedInstance.configuration = config
         
-        // Find the root view controller to present Google Sign-In
         guard let windowScene = await UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let rootViewController = await windowScene.windows.first?.rootViewController else {
-            print("Unable to find root view controller.")
             throw FirebaseErrorCode.internalError
         }
-        
-        // Start the sign in flow!
+
+        //start sign-in
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.main.async {
                 GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController) { userAuthentication, error in
-                    if let error = error {
-                        print("Google Sign-In failed: \(error.localizedDescription)")
+                    if error != nil {
                         continuation.resume(throwing: FirebaseErrorCode.internalError)
                         return
                     }
-                    
+
                     guard let fetchedUser = userAuthentication?.user,
                           let idToken = fetchedUser.idToken?.tokenString else {
-                        print("Unable to get user or ID token.")
                         continuation.resume(throwing: FirebaseErrorCode.internalError)
                         return
                     }
-                    
+
                     let credential = GoogleAuthProvider.credential(
                         withIDToken: idToken,
                         accessToken: fetchedUser.accessToken.tokenString
                     )
-                    
+
                     Task {
                         do {
                             let result = try await Auth.auth().signIn(with: credential)
                             continuation.resume(returning: result.user)
                         } catch {
-                            print("Firebase login with Google failed: \(error.localizedDescription)")
                             continuation.resume(throwing: FirebaseErrorCode.internalError)
                         }
                     }
@@ -120,6 +115,7 @@ class FirebaseAuthentication: FirebaseAuthenticationProtocol {
             }
         }
     }
+
     func reauthenticateUserWithGoogle() async throws -> User{
         guard let user = Auth.auth().currentUser else {
             throw FirebaseErrorCode.invalidUser
@@ -132,7 +128,6 @@ class FirebaseAuthentication: FirebaseAuthenticationProtocol {
             return user
             
         }catch{
-            print("Error getting Google Access Token: \(error.localizedDescription)")
             throw FirebaseErrorCode.internalError
         }
     }
@@ -148,34 +143,28 @@ class FirebaseAuthentication: FirebaseAuthenticationProtocol {
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.main.async {
                 loginManager.logIn(permissions: ["public_profile", "email"], from: rootViewController) { result, error in
-                    if let error = error {
-                        print("Facebook login failed: \(error.localizedDescription)")
+                    if error != nil {
                         continuation.resume(throwing: FirebaseErrorCode.invalidToken)
                         return
                     }
                     
                     guard let result = result, !result.isCancelled else {
-                        print("User cancelled Facebook login.")
                         continuation.resume(throwing: FirebaseErrorCode.processInterrupted)
                         return
                     }
                     
                     guard let accessToken = AccessToken.current?.tokenString else {
-                        print("Unable to get Facebook access token.")
                         continuation.resume(throwing: FirebaseErrorCode.invalidToken)
                         return
                     }
                     
-                    // Facebook access token to authenticate with Firebase
                     let credential = FacebookAuthProvider.credential(withAccessToken: accessToken)
                     
                     Task {
                         do {
-                            // Authenticate with Firebase using the Facebook credential
                             let authResult = try await Auth.auth().signIn(with: credential)
                             continuation.resume(returning: authResult.user)
                         } catch {
-                            print("Firebase login with Facebook failed: \(error.localizedDescription)")
                             continuation.resume(throwing: FirebaseErrorCode.reauthenticationFailed)
                         }
                     }
@@ -198,7 +187,6 @@ class FirebaseAuthentication: FirebaseAuthenticationProtocol {
             try await user.reauthenticate(with: credential)
             return user
         } catch {
-            print("Reauthentication failed: \(error.localizedDescription)")
             throw FirebaseErrorCode.invalidCredentials
         }
         
@@ -207,14 +195,12 @@ class FirebaseAuthentication: FirebaseAuthenticationProtocol {
     private func getGooleAccessToken() async throws -> AuthCredential?{
         guard let windowScene = await UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let rootViewController = await windowScene.windows.first?.rootViewController else {
-            print("Unable to find root view controller.")
             throw FirebaseErrorCode.internalError
         }
         do{
             let userAuthentication = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController)
             let fetchedUser = userAuthentication.user
             guard let idToken = fetchedUser.idToken?.tokenString else {
-                print("Unable to get user or ID token.")
                 throw FirebaseErrorCode.internalError
             }
             
@@ -227,28 +213,23 @@ class FirebaseAuthentication: FirebaseAuthenticationProtocol {
     private func getFacebookAccessToken() async throws -> AuthCredential? {
         guard let windowScene = await UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let rootViewController = await windowScene.windows.first?.rootViewController else {
-            print("Unable to find root view controller.")
             throw FirebaseErrorCode.internalError
         }
         
         return try await withCheckedThrowingContinuation { continuation in
             let loginManager = LoginManager()
             
-            // Initiate Facebook login to force reauthentication
             loginManager.logIn(permissions: ["public_profile", "email"], from: rootViewController) { result, error in
-                if let error = error {
-                    print("Facebook login failed: \(error.localizedDescription)")
+                if error != nil {
                     continuation.resume(throwing: FirebaseErrorCode.internalError)
                     return
                 }
                 
                 guard let result = result, !result.isCancelled,
                       let accessToken = AccessToken.current?.tokenString else {
-                    print("User cancelled Facebook login or no access token available.")
                     continuation.resume(throwing: FirebaseErrorCode.processInterrupted)
                     return
                 }
-                //return credentials
                 let credential = FacebookAuthProvider.credential(withAccessToken: accessToken)
                 continuation.resume(returning: credential)
             }

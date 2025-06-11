@@ -74,7 +74,6 @@ class ItineraryService: ItineraryServiceProtocol {
             }
             return itinerary
         }catch{
-            print("error here")
             throw ItineraryError.requestFailed
         }
     }

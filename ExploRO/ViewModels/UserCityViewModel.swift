@@ -20,13 +20,12 @@ class UserCityViewModel: ObservableObject {
         
         do {
             let idToken = try await user.getIDToken()
-            print("ID Token of authenticated user is: \(idToken)")
+            //print("ID Token of authenticated user is: \(idToken)")
             var fetchedCities = try await cityService.getUserCities(idToken: idToken)
             fetchedCities = fetchedCities.map { city in
                 var modifiedCity = city
                 if let imageUrl = city.imageUrl, !imageUrl.isEmpty {
                     modifiedCity.imageUrl = "\(AppConfig.baseURL)\(imageUrl)"
-                    print(modifiedCity.imageUrl ?? "No image found")
                 }
                 return modifiedCity
             }

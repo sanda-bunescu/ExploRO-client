@@ -7,14 +7,38 @@ struct RegisterView: View {
     @State private var username = ""
     @State private var email = ""
     @State private var password = ""
+    @State private var showCurrentPassword = false
     var body: some View {
         GeometryReader{geo1 in
             VStack{
                 TextFieldView(fieldName: "Username", fieldData: $username)
                 TextFieldView(fieldName: "Email", fieldData: $email)
-                
-                TextFieldView(fieldName: "Password", fieldData: $password)
-                if let errorMessage = authViewModel.errorMessage{
+                VStack(alignment: .leading) {
+                    Text("Password")
+
+                    ZStack(alignment: .trailing) {
+                        if showCurrentPassword {
+                            TextField("Password", text: $password)
+                        } else {
+                            SecureField("Password", text: $password)
+                        }
+
+                        Button(action: {
+                            showCurrentPassword.toggle()
+                        }) {
+                            Image(systemName: showCurrentPassword ? "eye.slash" : "eye")
+                                .foregroundColor(.gray)
+                        }
+                        .padding(.trailing,1)
+                    }
+                    .padding()
+                    .background(Color(red: 241/255.0, green: 241/255.0, blue: 241/255.0))
+                    .clipShape(RoundedRectangle(cornerRadius: 15.0))
+                    .shadow(radius: 2, x: 0, y: 4)
+                }
+                .padding(.horizontal)
+
+                if let errorMessage = authViewModel.errorMessage, !errorMessage.isEmpty{
                     Text(errorMessage)
                         .font(.custom("Poppins", size: 14))
                         .foregroundColor(.red)
@@ -56,7 +80,7 @@ struct RegisterView: View {
                 HStack{
                     Button{
                         Task{
-                            await authViewModel.loginWithGoogle()
+                            await authViewModel.registerWithGoogle()
                         }
                     }label: {
                         Image("google")
@@ -68,7 +92,7 @@ struct RegisterView: View {
                     .padding(.horizontal)
                     Button{
                         Task{
-                            await authViewModel.loginWithFacebook()
+                            await authViewModel.registerWithFacebook()
                         }
                     }label: {
                         Image("facebook")

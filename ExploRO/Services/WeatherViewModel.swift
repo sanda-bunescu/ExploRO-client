@@ -16,17 +16,15 @@ class WeatherViewModel: ObservableObject {
     }
 }
 
-
-private enum APIKEY {
-    static let key = "8842aee986056f3d2ed191a87282929d"
-}
-
 class WeatherService {
     
     private let baseURL = "https://api.openweathermap.org/data/2.5/weather"
     
     func getWeather(for city: String) -> AnyPublisher<WeatherResponse, Error> {
-        guard let url = URL(string: "\(baseURL)?q=\(city)&appid=\(APIKEY.key)&units=metric") else {
+        guard let weatherKey = Bundle.main.infoDictionary?["OPEN_WEATHER"] as? String else {
+            fatalError("Missing OpenWeather API key in Info.plist")
+        }
+        guard let url = URL(string: "\(baseURL)?q=\(city)&appid=\(weatherKey)&units=metric") else {
             fatalError("Invalid URL")
         }
         return URLSession.shared.dataTaskPublisher(for: url)
@@ -68,7 +66,7 @@ func weatherIcon(for description: String) -> String {
         case "tornado": return "tornado"
         case "squalls": return "wind"
 
-        default: return "questionmark.circle.fill" // Fallback icon
+        default: return "questionmark.circle.fill"
     }
 }
 

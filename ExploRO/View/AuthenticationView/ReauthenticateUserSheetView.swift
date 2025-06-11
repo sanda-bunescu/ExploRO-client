@@ -5,29 +5,44 @@ struct ReauthenticateUserSheetView: View {
     @EnvironmentObject var authViewModel: AuthenticationViewModel1
     @State private var enteredEmail = ""
     @State private var password = ""
-    //@State private var worningText = ""
     @State private var showGoodbye = false
+    @State private var showCurrentPassword = false
     var body: some View {
         NavigationStack {
             GeometryReader { geo1 in
                 VStack {
-                    Text("For your security, please reauthenticate before we can proceed with account deletion.")
+                    Text("For your security, please reauthenticate before we can proceed with account deletion. Please note that all data connected to your account will be permanently deleted and cannot be recovered.")
                         .font(.custom("Poppins", size: 16))
                         .foregroundStyle(.gray)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
-                        .padding(.top,20)
+                        .padding(.vertical,20)
                     
                     TextFieldView(fieldName: "Email", fieldData: $enteredEmail)
-                    //                    HStack{
-                    //                        Spacer()
-                    //                        Text(worningText)
-                    //                            .font(.custom("Poppins", size: 14))
-                    //                            .foregroundColor(.red)
-                    //                            .padding(.horizontal)
-                    //                            .padding(.top, 5)
-                    //                    }
-                    TextFieldView(fieldName: "Password", fieldData: $password)
+                    VStack(alignment: .leading) {
+                        Text("Password")
+
+                        ZStack(alignment: .trailing) {
+                            if showCurrentPassword {
+                                TextField("Password", text: $password)
+                            } else {
+                                SecureField("Password", text: $password)
+                            }
+
+                            Button(action: {
+                                showCurrentPassword.toggle()
+                            }) {
+                                Image(systemName: showCurrentPassword ? "eye.slash" : "eye")
+                                    .foregroundColor(.gray)
+                            }
+                            .padding(.trailing,1)
+                        }
+                        .padding()
+                        .background(Color(red: 241/255.0, green: 241/255.0, blue: 241/255.0))
+                        .clipShape(RoundedRectangle(cornerRadius: 15.0))
+                        .shadow(radius: 2, x: 0, y: 4)
+                    }
+                    .padding(.horizontal)
                     if let errorMessage = authViewModel.errorMessage{
                         Text(errorMessage)
                             .font(.custom("Poppins", size: 14))
@@ -42,9 +57,12 @@ struct ReauthenticateUserSheetView: View {
                     }
                     Button("Login") {
                         Task {
-                            if try await authViewModel.reauthenticateUserWithEmailAndPassword(email: enteredEmail, password: password){
-                                
-                                showGoodbye = true
+                            if authViewModel.verifyUserProvider(provider: "password"){
+                                if try await authViewModel.reauthenticateUserWithEmailAndPassword(email: enteredEmail, password: password){
+                                    showGoodbye = true
+                                }
+                            }else{
+                                authViewModel.errorMessage = "Wrong authentication method"
                             }
                         }
                     }
@@ -77,13 +95,12 @@ struct ReauthenticateUserSheetView: View {
                             Task{
                                 if authViewModel.verifyUserProvider(provider: "google.com"){
                                     if try await authViewModel.reauthenticateUserWithGoogle(){
-                                        await authViewModel.deleteUser()
-                                        
+                                        showGoodbye = true
                                     }else{
-                                        print("Error connecting with google. Verify if your account is connected with google.")
+                                        authViewModel.errorMessage = "Unknown error occurred. Please try again later."
                                     }
                                 }else{
-                                    print("Wrong authentication method")
+                                    authViewModel.errorMessage = "Wrong authentication method"
                                 }
                             }
                         } label: {
@@ -99,13 +116,13 @@ struct ReauthenticateUserSheetView: View {
                             Task{
                                 if authViewModel.verifyUserProvider(provider: "facebook.com"){
                                     if try await authViewModel.reauthenticateUserWithFacebook(){
-                                        await authViewModel.deleteUser()
+                                        showGoodbye = true
                                         
                                     }else{
-                                        print("error connecting with facebook. Verify if your account is connected with facebook.")
+                                        authViewModel.errorMessage = "Unknown error occurred. Please try again later."
                                     }
                                 }else{
-                                    print("Wrong authentication method")
+                                    authViewModel.errorMessage = "Wrong authentication method"
                                 }
                                 
                             }

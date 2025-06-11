@@ -7,23 +7,30 @@ struct TouristicAttractionDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 
-                AsyncImage(url: URL(string: attraction.imageUrl ?? "")) { image in
-                    image
-                        .resizable()
-                        .scaledToFill()
-                } placeholder: {
-                    ZStack {
-                        Color.gray.opacity(0.2)
-                        Image(systemName: "photo")
+                GeometryReader { geometry in
+                    AsyncImage(url: URL(string: attraction.imageUrl ?? "")) { image in
+                        image
                             .resizable()
-                            .scaledToFit()
-                            .frame(width: 60, height: 60)
-                            .foregroundColor(.gray)
+                            .scaledToFill()
+                            .frame(width: geometry.size.width * 0.95, height: 240)
+                            .clipped()
+                            .cornerRadius(12)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                    } placeholder: {
+                        ZStack {
+                            Color.gray.opacity(0.2)
+                            Image(systemName: "photo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 60, height: 60)
+                                .foregroundColor(.gray)
+                        }
                     }
+                    .frame(height: 240)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .shadow(radius: 5)
                 }
-                .frame(height: 250)
-                .clipShape(RoundedRectangle(cornerRadius: 20))
-                .shadow(radius: 5)
+                .frame(height: 240)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(attraction.attractionName)

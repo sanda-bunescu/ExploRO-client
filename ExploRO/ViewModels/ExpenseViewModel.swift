@@ -134,7 +134,6 @@ class ExpenseViewModel: ObservableObject {
             errorMessage = "User not authenticated"
             return
         }
-        print(expense)
         do{
             let idToken = try await user.getIDToken()
             try await self.expenseService.editExpense(expense: expense, idToken: idToken)

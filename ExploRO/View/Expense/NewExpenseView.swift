@@ -35,8 +35,16 @@ struct NewExpenseView: View {
                         
                         CustomTextField(title: "Amount", text: $stringAmount, keyboardType: .decimalPad)
                             .onChange(of: stringAmount) {
-                                request.amount = Double(stringAmount) ?? 0.0
+                                let formatter = NumberFormatter()
+                                formatter.locale = Locale.current
+                                formatter.numberStyle = .decimal
+                                if let number = formatter.number(from: stringAmount) {
+                                    request.amount = number.doubleValue
+                                } else {
+                                    request.amount = 0.0
+                                }
                             }
+
                         
                         CustomTextField(title: "Description", text: $request.description)
                     }

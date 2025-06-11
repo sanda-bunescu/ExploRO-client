@@ -10,20 +10,33 @@ struct TouristicAttractionShortView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Header Image
-            AsyncImage(url: URL(string: stopPoint.touristicAttraction.imageUrl ?? "")) { image in
-                image.resizable().scaledToFill()
-            } placeholder: {
-                ZStack {
-                    Color.gray.opacity(0.2)
-                    Image(systemName: "photo")
-                        .resizable().scaledToFit()
-                        .frame(width: 50, height: 50)
-                        .foregroundColor(.gray)
+            GeometryReader { geometry in
+                AsyncImage(url: URL(string: stopPoint.touristicAttraction.imageUrl ?? "")) { image in
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: geometry.size.width * 0.95, height: 180)
+                        .clipped()
+                        .cornerRadius(12)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                } placeholder: {
+                    ZStack {
+                        Color.gray.opacity(0.2)
+                        Image(systemName: "photo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 50, height: 50)
+                            .foregroundColor(.gray)
+                    }
+                    .frame(width: geometry.size.width * 0.95, height: 180)
+                    .clipped()
+                    .cornerRadius(12)
+                    .frame(maxWidth: .infinity, alignment: .center)
                 }
+                .frame(height: 180)
             }
             .frame(height: 180)
-            .clipped()
-            .cornerRadius(12)
+
 
             HStack {
                 VStack(alignment: .leading) {

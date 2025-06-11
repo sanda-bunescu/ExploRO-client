@@ -44,7 +44,7 @@ class CityViewModel: ObservableObject {
             let allCities = try await cityService.getAllCities(idToken: idToken)
             let savedCities = try await cityService.getUserCities(idToken: idToken)
             
-            // Filter out cities that are already saved
+            //filter out cities that are already saved
             let savedCityIDs = Set(savedCities.map { $0.id })
             var unsaved = allCities.filter { !savedCityIDs.contains($0.id) }
             unsaved = unsaved.map { city in

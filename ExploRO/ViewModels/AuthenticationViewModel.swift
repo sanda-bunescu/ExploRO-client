@@ -38,7 +38,7 @@ class AuthenticationViewModel1: ObservableObject {
             errorMessage = "Please fill in all fields"
             return
         }
-        //authenticationState = .authenticating
+        
         do {
             let firUser = try await firebaseService.loginWithEmailAndPassword(with: email, password: password)
             self.user = firUser
@@ -108,7 +108,7 @@ class AuthenticationViewModel1: ObservableObject {
         }
     }
     
-    func loginWithGoogle() async {
+    func registerWithGoogle() async {
         do {
             let firUser = try await firebaseService.loginWithGoogle()
             if let idToken = try? await firUser.getIDToken() {
@@ -116,12 +116,18 @@ class AuthenticationViewModel1: ObservableObject {
             }
             self.user = firUser
             authenticationState = .authenticated
+            errorMessage = nil
         } catch {
-            authenticationState = .unauthenticated
+            signOut()
+            if let backendError = error as? BackendServiceError {
+                errorMessage = backendError.errorDescription ?? "Unknown backend error"
+            } else {
+                errorMessage = error.localizedDescription
+            }
         }
     }
     
-    func loginWithFacebook() async {
+    func registerWithFacebook() async {
         do {
             let firUser = try await firebaseService.loginWithFacebook()
             if let idToken = try? await firUser.getIDToken() {
@@ -129,8 +135,75 @@ class AuthenticationViewModel1: ObservableObject {
             }
             self.user = firUser
             authenticationState = .authenticated
+            errorMessage = nil
         } catch {
-            authenticationState = .unauthenticated
+            signOut()
+            if let backendError = error as? BackendServiceError {
+                errorMessage = backendError.errorDescription ?? "Unknown backend error"
+            } else {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+    
+    
+    func loginWithGoogle() async {
+        do {
+            let firUser = try await firebaseService.loginWithGoogle()
+            if let idToken = try? await firUser.getIDToken() {
+                _ = try await backendService.sendIdTokenToBackend(idToken: idToken, for: .loginUser)
+            }
+            self.user = firUser
+            authenticationState = .authenticated
+            errorMessage = nil
+        } catch {
+            if let backendError = error as? BackendServiceError,
+               backendError.errorDescription == "User not found. Please register before logging in" {
+                
+                do {
+                    try await firebaseService.deleteUser()
+                    try firebaseService.logout()
+                    self.user = nil
+                    authenticationState = .unauthenticated
+                } catch {
+                    print("Error deleting firebase user: \(error.localizedDescription)")
+                }
+                
+                errorMessage = backendError.errorDescription
+                
+            } else {
+                authenticationState = .unauthenticated
+            }
+        }
+    }
+    
+    func loginWithFacebook() async {
+        do {
+            let firUser = try await firebaseService.loginWithFacebook()
+            if let idToken = try? await firUser.getIDToken() {
+                _ = try await backendService.sendIdTokenToBackend(idToken: idToken, for: .loginUser)
+            }
+            self.user = firUser
+            authenticationState = .authenticated
+            errorMessage = nil
+        } catch {
+            if let backendError = error as? BackendServiceError,
+               backendError.errorDescription == "User not found. Please register before logging in" {
+                
+                do {
+                    try await firebaseService.deleteUser()
+                    try firebaseService.logout()
+                    self.user = nil
+                    authenticationState = .unauthenticated
+                } catch {
+                    print("Error deleting firebase user: \(error.localizedDescription)")
+                }
+                
+                errorMessage = backendError.errorDescription
+                
+            } else {
+                authenticationState = .unauthenticated
+            }
         }
     }
     
@@ -161,7 +234,6 @@ class AuthenticationViewModel1: ObservableObject {
             user = try await firebaseService.reauthenticateUserWithGoogle()
             return true
         }catch{
-            print("Reauthentication error")
             return false
         }
         
@@ -171,7 +243,6 @@ class AuthenticationViewModel1: ObservableObject {
             user = try await firebaseService.reauthenticateUserWithFacebook()
             return true
         }catch{
-            print("Reauthentication error")
             return false
         }
         
@@ -228,10 +299,9 @@ class AuthenticationViewModel1: ObservableObject {
     
     func verifyUserProvider(provider: String) -> Bool {
         guard let user = Auth.auth().currentUser else {
-            return false // No user is logged in
+            return false
         }
         
-        // Loop through the user's providerData to check if the user is authenticated with the given provider
         for userInfo in user.providerData {
             if userInfo.providerID == provider {
                 return true

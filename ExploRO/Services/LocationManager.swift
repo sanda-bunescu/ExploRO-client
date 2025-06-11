@@ -5,19 +5,20 @@ struct LocationData: Codable {
     let locality: String
     let country: String
 }
-
 final class LocationManager: NSObject, CLLocationManagerDelegate, ObservableObject {
     @Published var lastKnownLocation: CLLocationCoordinate2D?
     @Published var locationDescription: LocationData = LocationData(locality: "", country: "")
     
-    var manager = CLLocationManager()
-    
+    private var manager = CLLocationManager()
+    private var lastGeocodeDate: Date = .distantPast
+
     override init() {
         super.init()
         manager.delegate = self
-        manager.startUpdatingLocation()
+        manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+        checkLocationAuthorization()
     }
-    
+
     func checkLocationAuthorization() {
         switch manager.authorizationStatus {
         case .notDetermined:
@@ -30,14 +31,19 @@ final class LocationManager: NSObject, CLLocationManagerDelegate, ObservableObje
             locationDescription = LocationData(locality: "Unknown location", country: "")
         }
     }
-    
+
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         checkLocationAuthorization()
     }
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]){
+
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
         lastKnownLocation = location.coordinate
+
+        let now = Date()
+        guard now.timeIntervalSince(lastGeocodeDate) > 10 else { return }
+        lastGeocodeDate = now
+
         lookUpCurrentLocation { placemark in
             if let placemark = placemark {
                 self.locationDescription = LocationData(locality: placemark.locality ?? "", country: placemark.country ?? "")
@@ -46,20 +52,18 @@ final class LocationManager: NSObject, CLLocationManagerDelegate, ObservableObje
             }
         }
     }
-    
+
     func lookUpCurrentLocation(completionHandler: @escaping (CLPlacemark?) -> Void) {
         guard let lastLocation = manager.location else {
             completionHandler(nil)
             return
         }
-        
+
         let geocoder = CLGeocoder()
-        geocoder.reverseGeocodeLocation(lastLocation) { (placemarks, error) in
+        geocoder.reverseGeocodeLocation(lastLocation) { placemarks, error in
             if error == nil {
-                let firstLocation = placemarks?[0]
-                completionHandler(firstLocation)
-            }
-            else {
+                completionHandler(placemarks?.first)
+            } else {
                 completionHandler(nil)
             }
         }
